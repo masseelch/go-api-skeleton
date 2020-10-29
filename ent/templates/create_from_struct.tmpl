@@ -1,0 +1,18 @@
+{{ define "create_from_struct" }}
+    {{ $pkg := base $.Config.Package }}
+    {{ template "header" $ }}
+
+    {{ range $n := $.Nodes }}
+        {{ $builder := $n.CreateName }}
+        {{ $receiver := $n.Receiver }}
+
+        func ({{ $receiver }} *{{ $builder }}) Set{{ $n.Name }}(input *{{ $n.Name }}) *{{ $builder }} {
+        {{- range $f := $n.Fields }}
+            {{- $setter := print "Set" $f.StructField }}
+            {{ $receiver }}.{{ $setter }}(input.{{ $f.StructField }})
+        {{- end }}
+        return {{ $receiver }}
+        }
+    {{ end }}
+
+{{end}}
