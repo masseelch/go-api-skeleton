@@ -26,17 +26,17 @@ func jobs(refs refs, c *ent.Client) error {
 			return err
 		}
 
-		b[i] = c.Job.Create().SetJob(&ent.Job{
-			Date:                   t,
-			Task:                   randomdata.Paragraph(),
-			State:                  states[rand.Intn(len(states))],
-			Report:                 "",
-			Rest:                   "",
-			Note:                   "",
-			CustomerName:           randomdata.SillyName(),
-			RiskAssessmentRequired: randomdata.Boolean(),
-			MaintenanceRequired:    randomdata.Boolean(),
-		}).AddUsers(refs.user())
+		b[i] = c.Job.Create().
+			SetDate(t).
+			SetTask(randomdata.Paragraph()).
+			SetState(states[rand.Intn(len(states))]).
+			SetReport("").
+			SetRest("").
+			SetNote("").
+			SetCustomerName(randomdata.SillyName()).
+			SetRiskAssessmentRequired(randomdata.Boolean()).
+			SetMaintenanceRequired(randomdata.Boolean()).
+			AddUsers(refs.user())
 	}
 
 	var err error

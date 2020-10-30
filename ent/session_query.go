@@ -113,8 +113,8 @@ func (sq *SessionQuery) FirstID(ctx context.Context) (id go_token.Token, err err
 	return ids[0], nil
 }
 
-// FirstXID is like FirstID, but panics if an error occurs.
-func (sq *SessionQuery) FirstXID(ctx context.Context) go_token.Token {
+// FirstIDX is like FirstID, but panics if an error occurs.
+func (sq *SessionQuery) FirstIDX(ctx context.Context) go_token.Token {
 	id, err := sq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -245,6 +245,9 @@ func (sq *SessionQuery) ExistX(ctx context.Context) bool {
 // Clone returns a duplicate of the query builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
 func (sq *SessionQuery) Clone() *SessionQuery {
+	if sq == nil {
+		return nil
+	}
 	return &SessionQuery{
 		config:     sq.config,
 		limit:      sq.limit,
@@ -252,6 +255,7 @@ func (sq *SessionQuery) Clone() *SessionQuery {
 		order:      append([]OrderFunc{}, sq.order...),
 		unique:     append([]string{}, sq.unique...),
 		predicates: append([]predicate.Session{}, sq.predicates...),
+		withUser:   sq.withUser.Clone(),
 		// clone intermediate query.
 		sql:  sq.sql.Clone(),
 		path: sq.path,

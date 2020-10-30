@@ -147,6 +147,12 @@ func (jc *JobCreate) SetNillableMaintenanceRequired(b *bool) *JobCreate {
 	return jc
 }
 
+// SetID sets the id field.
+func (jc *JobCreate) SetID(i int) *JobCreate {
+	jc.mutation.SetID(i)
+	return jc
+}
+
 // AddUserIDs adds the users edge to User by ids.
 func (jc *JobCreate) AddUserIDs(ids ...int) *JobCreate {
 	jc.mutation.AddUserIDs(ids...)
@@ -250,8 +256,10 @@ func (jc *JobCreate) sqlSave(ctx context.Context) (*Job, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _node.ID == 0 {
+		id := _spec.ID.Value.(int64)
+		_node.ID = int(id)
+	}
 	return _node, nil
 }
 
@@ -266,6 +274,10 @@ func (jc *JobCreate) createSpec() (*Job, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+	if id, ok := jc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = id
+	}
 	if value, ok := jc.mutation.Date(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
@@ -400,8 +412,10 @@ func (jcb *JobCreateBulk) Save(ctx context.Context) ([]*Job, error) {
 				if err != nil {
 					return nil, err
 				}
-				id := specs[i].ID.Value.(int64)
-				nodes[i].ID = int(id)
+				if nodes[i].ID == 0 {
+					id := specs[i].ID.Value.(int64)
+					nodes[i].ID = int(id)
+				}
 				return nodes[i], nil
 			})
 			for i := len(builder.hooks) - 1; i >= 0; i-- {

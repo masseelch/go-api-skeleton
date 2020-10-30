@@ -11,7 +11,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/masseelch/go-api-skeleton/auth"
 	"github.com/masseelch/go-api-skeleton/ent"
-	"github.com/masseelch/go-api-skeleton/handler"
+	"github.com/masseelch/go-api-skeleton/ent/handler"
 	"github.com/masseelch/go-api-skeleton/util"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -52,7 +52,7 @@ var serveCmd = &cobra.Command{
 		r.Group(func(r chi.Router) {
 			r.Use(auth.Middleware(c, l))
 
-			r.Mount("/users", handler.NewJobHandler(c, v, l))
+			r.Mount("/jobs", handler.NewJobHandler(c, v, l))
 		})
 
 		log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", p), r))

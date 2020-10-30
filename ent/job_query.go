@@ -112,8 +112,8 @@ func (jq *JobQuery) FirstID(ctx context.Context) (id int, err error) {
 	return ids[0], nil
 }
 
-// FirstXID is like FirstID, but panics if an error occurs.
-func (jq *JobQuery) FirstXID(ctx context.Context) int {
+// FirstIDX is like FirstID, but panics if an error occurs.
+func (jq *JobQuery) FirstIDX(ctx context.Context) int {
 	id, err := jq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -244,6 +244,9 @@ func (jq *JobQuery) ExistX(ctx context.Context) bool {
 // Clone returns a duplicate of the query builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
 func (jq *JobQuery) Clone() *JobQuery {
+	if jq == nil {
+		return nil
+	}
 	return &JobQuery{
 		config:     jq.config,
 		limit:      jq.limit,
@@ -251,6 +254,7 @@ func (jq *JobQuery) Clone() *JobQuery {
 		order:      append([]OrderFunc{}, jq.order...),
 		unique:     append([]string{}, jq.unique...),
 		predicates: append([]predicate.Job{}, jq.predicates...),
+		withUsers:  jq.withUsers.Clone(),
 		// clone intermediate query.
 		sql:  jq.sql.Clone(),
 		path: jq.path,
@@ -274,7 +278,7 @@ func (jq *JobQuery) WithUsers(opts ...func(*UserQuery)) *JobQuery {
 // Example:
 //
 //	var v []struct {
-//		Date time.Time `json:"date,omitempty"`
+//		Date time.Time `json:"date,omitempty" groups:"job:list"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -300,7 +304,7 @@ func (jq *JobQuery) GroupBy(field string, fields ...string) *JobGroupBy {
 // Example:
 //
 //	var v []struct {
-//		Date time.Time `json:"date,omitempty"`
+//		Date time.Time `json:"date,omitempty" groups:"job:list"`
 //	}
 //
 //	client.Job.Query().
@@ -365,6 +369,7 @@ func (jq *JobQuery) sqlAll(ctx context.Context) ([]*Job, error) {
 		for _, node := range nodes {
 			ids[node.ID] = node
 			fks = append(fks, node.ID)
+			node.Edges.Users = []*User{}
 		}
 		var (
 			edgeids []int

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/masseelch/go-api-skeleton/ent/job"
+	"github.com/masseelch/go-api-skeleton/ent/predicate"
 	"github.com/masseelch/go-api-skeleton/ent/session"
 	"github.com/masseelch/go-api-skeleton/ent/user"
 	go_token "github.com/masseelch/go-token"
@@ -52,6 +53,7 @@ type JobMutation struct {
 	clearedusers           bool
 	done                   bool
 	oldValue               func(context.Context) (*Job, error)
+	predicates             []predicate.Job
 }
 
 var _ ent.Mutation = (*JobMutation)(nil)
@@ -122,6 +124,12 @@ func (m JobMutation) Tx() (*Tx, error) {
 	tx := &Tx{config: m.config}
 	tx.init()
 	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that, this
+// operation is accepted only on Job creation.
+func (m *JobMutation) SetID(id int) {
+	m.id = &id
 }
 
 // ID returns the id value in the mutation. Note that, the id
@@ -986,6 +994,7 @@ type SessionMutation struct {
 	cleareduser       bool
 	done              bool
 	oldValue          func(context.Context) (*Session, error)
+	predicates        []predicate.Session
 }
 
 var _ ent.Mutation = (*SessionMutation)(nil)
@@ -1414,6 +1423,7 @@ type UserMutation struct {
 	clearedjobs     bool
 	done            bool
 	oldValue        func(context.Context) (*User, error)
+	predicates      []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)

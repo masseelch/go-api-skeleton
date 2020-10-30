@@ -2,6 +2,8 @@ package schema
 
 import (
 	"github.com/facebook/ent"
+	"github.com/facebook/ent/schema"
+
 	"github.com/facebook/ent/schema/edge"
 	"github.com/facebook/ent/schema/field"
 )
@@ -20,30 +22,51 @@ type Job struct {
 // Fields of the Job.
 func (Job) Fields() []ent.Field {
 	return []ent.Field{
+		field.Int("id").
+			StructTag(`groups:"job:list"`),
 		field.Time("date").
-			Optional(),
+			Optional().
+			StructTag(`groups:"job:list"`),
 		field.String("task").
-			Optional(),
+			Optional().
+			StructTag(`groups:"job:list"`),
 		field.String("state").
-			Default(JobStateOpen),
+			Default(JobStateOpen).
+			StructTag(`groups:"job:list"`),
 		field.Text("report").
-			Optional(),
+			Optional().
+			StructTag(`groups:"job:list"`),
 		field.Text("rest").
-			Optional(),
+			Optional().
+			StructTag(`groups:"job:list"`),
 		field.Text("note").
-			Optional(),
+			Optional().
+			StructTag(`groups:"job:list"`),
 		field.String("customerName").
-			Optional(),
+			Optional().
+			StructTag(`groups:"job:list"`),
 		field.Bool("riskAssessmentRequired").
-			Default(false),
+			Default(false).
+			StructTag(`groups:"job:list"`),
 		field.Bool("maintenanceRequired").
-			Default(false),
+			Default(false).
+			StructTag(`groups:"job:list"`),
 	}
 }
 
 // Edges of the Job.
 func (Job) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("users", User.Type),
+		edge.To("users", User.Type).
+			StructTag(`groups:"job:list"`),
+	}
+}
+
+// Annotations of the Job.
+func (Job) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		edge.Annotation{
+			StructTag: `json:"edges" groups:"job:list"`,
+		},
 	}
 }

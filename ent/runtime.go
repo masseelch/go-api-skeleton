@@ -8,22 +8,22 @@ import (
 	"github.com/masseelch/go-api-skeleton/ent/user"
 )
 
-// The init function reads all schema descriptors with runtime
-// code (default values, validators or hooks) and stitches it
+// The init function reads all schema descriptors with runtime code
+// (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
 	jobFields := schema.Job{}.Fields()
 	_ = jobFields
 	// jobDescState is the schema descriptor for state field.
-	jobDescState := jobFields[2].Descriptor()
+	jobDescState := jobFields[3].Descriptor()
 	// job.DefaultState holds the default value on creation for the state field.
 	job.DefaultState = jobDescState.Default.(string)
 	// jobDescRiskAssessmentRequired is the schema descriptor for riskAssessmentRequired field.
-	jobDescRiskAssessmentRequired := jobFields[7].Descriptor()
+	jobDescRiskAssessmentRequired := jobFields[8].Descriptor()
 	// job.DefaultRiskAssessmentRequired holds the default value on creation for the riskAssessmentRequired field.
 	job.DefaultRiskAssessmentRequired = jobDescRiskAssessmentRequired.Default.(bool)
 	// jobDescMaintenanceRequired is the schema descriptor for maintenanceRequired field.
-	jobDescMaintenanceRequired := jobFields[8].Descriptor()
+	jobDescMaintenanceRequired := jobFields[9].Descriptor()
 	// job.DefaultMaintenanceRequired holds the default value on creation for the maintenanceRequired field.
 	job.DefaultMaintenanceRequired = jobDescMaintenanceRequired.Default.(bool)
 	userFields := schema.User{}.Fields()

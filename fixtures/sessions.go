@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func sessions(refs refs, c *ent.Client) error {
+func sessions(_ refs, c *ent.Client) error {
 	_, err := c.Session.Create().
 		SetID("valid_token").
 		SetIdleTimeExpiredAt(time.Now().Add(24 * time.Hour)).

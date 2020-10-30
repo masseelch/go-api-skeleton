@@ -18,14 +18,13 @@ import (
 // SessionUpdate is the builder for updating Session entities.
 type SessionUpdate struct {
 	config
-	hooks      []Hook
-	mutation   *SessionMutation
-	predicates []predicate.Session
+	hooks    []Hook
+	mutation *SessionMutation
 }
 
 // Where adds a new predicate for the builder.
 func (su *SessionUpdate) Where(ps ...predicate.Session) *SessionUpdate {
-	su.predicates = append(su.predicates, ps...)
+	su.mutation.predicates = append(su.mutation.predicates, ps...)
 	return su
 }
 
@@ -127,7 +126,7 @@ func (su *SessionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			},
 		},
 	}
-	if ps := su.predicates; len(ps) > 0 {
+	if ps := su.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)

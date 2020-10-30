@@ -16,14 +16,13 @@ import (
 // JobDelete is the builder for deleting a Job entity.
 type JobDelete struct {
 	config
-	hooks      []Hook
-	mutation   *JobMutation
-	predicates []predicate.Job
+	hooks    []Hook
+	mutation *JobMutation
 }
 
 // Where adds a new predicate to the delete builder.
 func (jd *JobDelete) Where(ps ...predicate.Job) *JobDelete {
-	jd.predicates = append(jd.predicates, ps...)
+	jd.mutation.predicates = append(jd.mutation.predicates, ps...)
 	return jd
 }
 
@@ -75,7 +74,7 @@ func (jd *JobDelete) sqlExec(ctx context.Context) (int, error) {
 			},
 		},
 	}
-	if ps := jd.predicates; len(ps) > 0 {
+	if ps := jd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)

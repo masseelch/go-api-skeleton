@@ -18,14 +18,13 @@ import (
 // JobUpdate is the builder for updating Job entities.
 type JobUpdate struct {
 	config
-	hooks      []Hook
-	mutation   *JobMutation
-	predicates []predicate.Job
+	hooks    []Hook
+	mutation *JobMutation
 }
 
 // Where adds a new predicate for the builder.
 func (ju *JobUpdate) Where(ps ...predicate.Job) *JobUpdate {
-	ju.predicates = append(ju.predicates, ps...)
+	ju.mutation.predicates = append(ju.mutation.predicates, ps...)
 	return ju
 }
 
@@ -294,7 +293,7 @@ func (ju *JobUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			},
 		},
 	}
-	if ps := ju.predicates; len(ps) > 0 {
+	if ps := ju.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
