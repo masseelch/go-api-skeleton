@@ -145,6 +145,6 @@ func TestMiddleware(t *testing.T) {
 	}
 }
 
-func assertHandlerNotCalled(t *testing.T, tt test) {
+func assertHandlerNotCalled(t *testing.T, _ test) {
 	assert.Fail(t, "handler should not have been called")
 }

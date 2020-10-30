@@ -12,6 +12,6 @@ func MysqlDSN() string {
 		viper.Get("database.password"),
 		viper.Get("database.host"),
 		viper.Get("database.port"),
-		viper.Get("database.table"),
+		viper.Get("database.name"),
 	)
 }

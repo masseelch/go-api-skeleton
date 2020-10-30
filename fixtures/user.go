@@ -21,8 +21,15 @@ func users(refs refs, c *ent.Client) error {
 		return err
 	}
 
-	b := make([]*ent.UserCreate, userCount)
-	for i := 0; i < userCount; i++ {
+	b := make([]*ent.UserCreate, userCount + 1)
+
+	b[0] = c.User.Create().SetUser(&ent.User{
+		Email:    "user@api.com",
+		Password: string(p),
+		Enabled:  true,
+	})
+
+	for i := 1; i <= userCount; i++ {
 		b[i] = c.User.Create().SetUser(&ent.User{
 			Email:    randomdata.Email(),
 			Password: string(p),

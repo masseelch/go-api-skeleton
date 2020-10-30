@@ -36,8 +36,8 @@ func init() {
 	// Database configuration
 	rootCmd.PersistentFlags().String("database.host", "localhost", "database host")
 	rootCmd.PersistentFlags().String("database.port", "3306", "database host")
-	rootCmd.PersistentFlags().String("database.table", "todo_ent_cobra", "database table")
-	rootCmd.PersistentFlags().String("database.user", "todo_ent_cobra", "database user")
+	rootCmd.PersistentFlags().String("database.name", "go_api_skeleton", "database name")
+	rootCmd.PersistentFlags().String("database.user", "go_api_skeleton", "database user")
 	rootCmd.PersistentFlags().String("database.password", "", "database password")
 
 	// Bind all yet defined flags. Every flag after this line will not be passed to viper.

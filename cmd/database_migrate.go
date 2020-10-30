@@ -48,7 +48,7 @@ var migrateCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(migrateCmd)
+	databaseCmd.AddCommand(migrateCmd)
 
 	migrateCmd.Flags().Bool("dump-sql", false, "Dump the sql to be executed")
 	migrateCmd.Flags().Bool("force", false, "Execute the migration")

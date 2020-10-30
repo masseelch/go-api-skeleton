@@ -11,7 +11,6 @@ const (
 	jobKey
 )
 
-
 type refs map[uint]interface{}
 
 func Load(c *ent.Client) error {
@@ -19,6 +18,9 @@ func Load(c *ent.Client) error {
 	refs := make(refs)
 
 	if err := users(refs, c); err != nil {
+		return err
+	}
+	if err := sessions(refs, c); err != nil {
 		return err
 	}
 	if err := jobs(refs, c); err != nil {
