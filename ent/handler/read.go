@@ -19,7 +19,7 @@ import (
 
 // This function fetches the Job model identified by a give url-parameter from
 // database and returns it to the client.
-func (h JobHandler) read(w http.ResponseWriter, r *http.Request) {
+func (h JobHandler) Read(w http.ResponseWriter, r *http.Request) {
 	idp := chi.URLParam(r, "id")
 	if idp == "" {
 		h.logger.WithField("id", idp).Info("empty 'id' url param")
@@ -57,7 +57,7 @@ func (h JobHandler) read(w http.ResponseWriter, r *http.Request) {
 
 // This function fetches the Session model identified by a give url-parameter from
 // database and returns it to the client.
-func (h SessionHandler) read(w http.ResponseWriter, r *http.Request) {
+func (h SessionHandler) Read(w http.ResponseWriter, r *http.Request) {
 	idp := chi.URLParam(r, "id")
 	if idp == "" {
 		h.logger.WithField("id", idp).Info("empty 'id' url param")
@@ -90,7 +90,7 @@ func (h SessionHandler) read(w http.ResponseWriter, r *http.Request) {
 
 // This function fetches the User model identified by a give url-parameter from
 // database and returns it to the client.
-func (h UserHandler) read(w http.ResponseWriter, r *http.Request) {
+func (h UserHandler) Read(w http.ResponseWriter, r *http.Request) {
 	idp := chi.URLParam(r, "id")
 	if idp == "" {
 		h.logger.WithField("id", idp).Info("empty 'id' url param")

@@ -52,7 +52,7 @@ var serveCmd = &cobra.Command{
 		r.Group(func(r chi.Router) {
 			r.Use(auth.Middleware(c, l))
 
-			r.Mount("/jobs", handler.NewJobHandler(c, v, l))
+			r.Mount("/jobs", handler.NewJobHandler(c, v, l).EnableAllEndpoints())
 		})
 
 		log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", p), r))
