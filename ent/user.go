@@ -23,15 +23,15 @@ type User struct {
 	Enabled bool `json:"enabled,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
-	Edges UserEdges `json:"edges"`
+	Edges UserEdges `json:"edges" groups:"user:read"`
 }
 
 // UserEdges holds the relations/edges for other nodes in the graph.
 type UserEdges struct {
 	// Sessions holds the value of the sessions edge.
-	Sessions []*Session
+	Sessions []*Session `json:"-"`
 	// Jobs holds the value of the jobs edge.
-	Jobs []*Job
+	Jobs []*Job `json:"jobs,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool

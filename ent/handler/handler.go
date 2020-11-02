@@ -12,6 +12,7 @@ import (
 	"github.com/masseelch/go-api-skeleton/ent"
 )
 
+// The JobHandler.
 type JobHandler struct {
 	r *chi.Mux
 
@@ -20,6 +21,7 @@ type JobHandler struct {
 	logger    *logrus.Logger
 }
 
+// Create a new JobHandler
 func NewJobHandler(c *ent.Client, v *validator.Validate, log *logrus.Logger) *JobHandler {
 	h := &JobHandler{
 		r:         chi.NewRouter(),
@@ -33,10 +35,40 @@ func NewJobHandler(c *ent.Client, v *validator.Validate, log *logrus.Logger) *Jo
 	return h
 }
 
+// Implement the net/http Handler interface.
 func (h JobHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h.r.ServeHTTP(w, r)
 }
 
+// The SessionHandler.
+type SessionHandler struct {
+	r *chi.Mux
+
+	client    *ent.Client
+	validator *validator.Validate
+	logger    *logrus.Logger
+}
+
+// Create a new SessionHandler
+func NewSessionHandler(c *ent.Client, v *validator.Validate, log *logrus.Logger) *SessionHandler {
+	h := &SessionHandler{
+		r:         chi.NewRouter(),
+		client:    c,
+		validator: v,
+		logger:    log,
+	}
+
+	h.r.Get("/{id:\\d+}", h.read)
+
+	return h
+}
+
+// Implement the net/http Handler interface.
+func (h SessionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	h.r.ServeHTTP(w, r)
+}
+
+// The UserHandler.
 type UserHandler struct {
 	r *chi.Mux
 
@@ -45,6 +77,7 @@ type UserHandler struct {
 	logger    *logrus.Logger
 }
 
+// Create a new UserHandler
 func NewUserHandler(c *ent.Client, v *validator.Validate, log *logrus.Logger) *UserHandler {
 	h := &UserHandler{
 		r:         chi.NewRouter(),
@@ -58,6 +91,7 @@ func NewUserHandler(c *ent.Client, v *validator.Validate, log *logrus.Logger) *U
 	return h
 }
 
+// Implement the net/http Handler interface.
 func (h UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h.r.ServeHTTP(w, r)
 }

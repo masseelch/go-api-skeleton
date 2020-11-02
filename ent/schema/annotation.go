@@ -1,9 +1,9 @@
 package schema
 
-type Annotation struct {
-
+type HandlerAnnotation struct {
+	ReadEager []string
 }
 
-func (Annotation) Name() string {
-	return ""
+func (HandlerAnnotation) Name() string {
+	return "HandlerGen"
 }

@@ -22,35 +22,25 @@ type Job struct {
 // Fields of the Job.
 func (Job) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("id").
-			StructTag(`groups:"job:list"`),
+		field.Int("id"),
 		field.Time("date").
-			Optional().
-			StructTag(`groups:"job:list"`),
+			Optional(),
 		field.String("task").
-			Optional().
-			StructTag(`groups:"job:list"`),
+			Optional(),
 		field.String("state").
-			Default(JobStateOpen).
-			StructTag(`groups:"job:list"`),
+			Default(JobStateOpen),
 		field.Text("report").
-			Optional().
-			StructTag(`groups:"job:list"`),
+			Optional(),
 		field.Text("rest").
-			Optional().
-			StructTag(`groups:"job:list"`),
+			Optional(),
 		field.Text("note").
-			Optional().
-			StructTag(`groups:"job:list"`),
+			Optional(),
 		field.String("customerName").
-			Optional().
-			StructTag(`groups:"job:list"`),
+			Optional(),
 		field.Bool("riskAssessmentRequired").
-			Default(false).
-			StructTag(`groups:"job:list"`),
+			Default(false),
 		field.Bool("maintenanceRequired").
-			Default(false).
-			StructTag(`groups:"job:list"`),
+			Default(false),
 	}
 }
 
@@ -58,7 +48,7 @@ func (Job) Fields() []ent.Field {
 func (Job) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("users", User.Type).
-			StructTag(`groups:"job:list"`),
+			StructTag(`json:"users,omitempty"`),
 	}
 }
 
@@ -66,7 +56,10 @@ func (Job) Edges() []ent.Edge {
 func (Job) Annotations() []schema.Annotation {
 	return []schema.Annotation{
 		edge.Annotation{
-			StructTag: `json:"edges" groups:"job:list"`,
+			StructTag: `json:"edges"`,
+		},
+		HandlerAnnotation{
+			ReadEager: []string{"users"},
 		},
 	}
 }
