@@ -15,12 +15,16 @@ type User struct {
 // Fields of the User.
 func (User) Fields() []ent.Field {
 	return []ent.Field{
+		field.Int("id").
+			StructTag(`groups:"user:list"`),
 		field.String("email").
-			Unique(),
+			Unique().
+			StructTag(`groups:"user:list"`),
 		field.String("password").
 			Sensitive(),
 		field.Bool("enabled").
-			Default(false),
+			Default(false).
+			StructTag(`groups:"user:list"`),
 	}
 }
 
@@ -31,7 +35,7 @@ func (User) Edges() []ent.Edge {
 			StructTag(`json:"-"`),
 		edge.From("jobs", Job.Type).
 			Ref("users").
-			StructTag(`json:"jobs,omitempty"`),
+			StructTag(`json:"jobs,omitempty" groups:"user:read"`),
 	}
 }
 

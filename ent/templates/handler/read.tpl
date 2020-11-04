@@ -8,6 +8,7 @@
     import (
         "github.com/go-chi/chi"
         "github.com/go-playground/validator/v10"
+        "github.com/liip/sheriff"
         "github.com/masseelch/render"
         "github.com/sirupsen/logrus"
         "net/http"
@@ -73,8 +74,22 @@
                 }
             }
 
-            h.logger.WithField("job", e.ID).Info("job rendered") // todo - better stuff here pls
-            render.OK(w, r, e)
+            {{ $groups := $n.Annotations.HandlerGen.ReadGroups }}
+            d, err := sheriff.Marshal(&sheriff.Options{Groups: []string{
+                {{- if $groups }}
+                    {{- range $g := $groups}}"{{$g}}",{{ end -}}
+                {{ else -}}
+                    "{{ $n.Name | snake }}:list"
+                {{- end -}}
+            }}, e)
+            if err != nil {
+                h.logger.WithError(err).Error("sheriff") // todo - better stuff here pls
+                render.InternalServerError(w, r, "sheriff")
+            return
+            }
+
+            h.logger.WithField("{{ $n.Name | snake }}", e.ID).Info("job rendered") // todo - better stuff here pls
+            render.OK(w, r, d)
         }
 
     {{ end }}

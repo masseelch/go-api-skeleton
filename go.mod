@@ -9,6 +9,7 @@ require (
 	github.com/go-chi/chi v4.1.2+incompatible
 	github.com/go-playground/validator/v10 v10.4.1
 	github.com/go-sql-driver/mysql v1.5.1-0.20200311113236-681ffa848bae
+	github.com/liip/sheriff v0.9.0
 	github.com/magiconair/properties v1.8.4 // indirect
 	github.com/masseelch/go-token v1.0.0
 	github.com/masseelch/render v1.0.1

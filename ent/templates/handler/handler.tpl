@@ -43,12 +43,19 @@
         // Enable all endpoints.
         func (h *{{ $n.Name }}Handler) EnableAllEndpoints() *{{ $n.Name }}Handler {
             h.EnableReadEndpoint()
+            h.EnableListEndpoint()
             return h
         }
 
         // Enable the read operation.
         func (h *{{ $n.Name }}Handler) EnableReadEndpoint() *{{ $n.Name }}Handler {
             h.r.Get("/{id:\\d+}", h.Read)
+            return h
+        }
+
+        // Enable the list operation.
+        func (h *{{ $n.Name }}Handler) EnableListEndpoint() *{{ $n.Name }}Handler {
+            h.r.Get("/", h.List)
             return h
         }
 

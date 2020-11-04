@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi"
+	"github.com/liip/sheriff"
 	"github.com/masseelch/render"
 
 	"github.com/masseelch/go-api-skeleton/ent"
@@ -51,8 +52,15 @@ func (h JobHandler) Read(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	d, err := sheriff.Marshal(&sheriff.Options{Groups: []string{"job:list", "user:list"}}, e)
+	if err != nil {
+		h.logger.WithError(err).Error("sheriff") // todo - better stuff here pls
+		render.InternalServerError(w, r, "sheriff")
+		return
+	}
+
 	h.logger.WithField("job", e.ID).Info("job rendered") // todo - better stuff here pls
-	render.OK(w, r, e)
+	render.OK(w, r, d)
 }
 
 // This function fetches the Session model identified by a give url-parameter from
@@ -84,8 +92,15 @@ func (h SessionHandler) Read(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	h.logger.WithField("job", e.ID).Info("job rendered") // todo - better stuff here pls
-	render.OK(w, r, e)
+	d, err := sheriff.Marshal(&sheriff.Options{Groups: []string{"session:list"}}, e)
+	if err != nil {
+		h.logger.WithError(err).Error("sheriff") // todo - better stuff here pls
+		render.InternalServerError(w, r, "sheriff")
+		return
+	}
+
+	h.logger.WithField("session", e.ID).Info("job rendered") // todo - better stuff here pls
+	render.OK(w, r, d)
 }
 
 // This function fetches the User model identified by a give url-parameter from
@@ -122,6 +137,13 @@ func (h UserHandler) Read(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	h.logger.WithField("job", e.ID).Info("job rendered") // todo - better stuff here pls
-	render.OK(w, r, e)
+	d, err := sheriff.Marshal(&sheriff.Options{Groups: []string{"user:list"}}, e)
+	if err != nil {
+		h.logger.WithError(err).Error("sheriff") // todo - better stuff here pls
+		render.InternalServerError(w, r, "sheriff")
+		return
+	}
+
+	h.logger.WithField("user", e.ID).Info("job rendered") // todo - better stuff here pls
+	render.OK(w, r, d)
 }

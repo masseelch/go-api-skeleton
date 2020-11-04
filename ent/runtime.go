@@ -29,7 +29,7 @@ func init() {
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescEnabled is the schema descriptor for enabled field.
-	userDescEnabled := userFields[2].Descriptor()
+	userDescEnabled := userFields[3].Descriptor()
 	// user.DefaultEnabled holds the default value on creation for the enabled field.
 	user.DefaultEnabled = userDescEnabled.Default.(bool)
 }

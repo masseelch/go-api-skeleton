@@ -45,7 +45,7 @@ func LoginHandler(c *ent.Client, v *validator.Validate, log *logrus.Logger) http
 		}
 
 		// Get the user for the given email.
-		u, err := c.User.Query().Where(user.EmailEQ(cr.Email)).Only(r.Context())
+		u, err := c.User.Query().Where(user.Email(cr.Email)).Only(r.Context())
 		if err != nil {
 			log.WithError(err).WithField("email", cr.Email).Info(logUserNotFound)
 			render.Unauthorized(w, r, errBadCredentials)

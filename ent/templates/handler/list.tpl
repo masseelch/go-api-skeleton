@@ -1,4 +1,4 @@
-{{ define "handler/read" }}
+{{ define "handler/list" }}
 
     {{ $pkg := base "handler" }}
     {{- with extend $ "Package" "handler" -}}
@@ -17,66 +17,83 @@
         {{- range $n := $.Nodes}}
             "{{ $.Config.Package }}/{{ $n.Package }}"
         {{- end }}
-
-        {{/* Import a possible custom GoType for the ID. */}}
-        {{- range $n := $.Nodes}}
-            {{- if $n.ID.HasGoType }}
-                "{{ $n.ID.Type.PkgPath }}"
-            {{- end }}
-        {{- end}}
     )
 
     {{ range $n := $.Nodes }}
-        // This function fetches the {{ $n.Name }} model identified by a give url-parameter from
-        // database and returns it to the client.
-        func(h {{ $n.Name }}Handler) Read(w http.ResponseWriter, r *http.Request) {
-            idp := chi.URLParam(r, "id")
-            if idp == "" {
-                h.logger.WithField("id", idp).Info("empty 'id' url param")
-                render.BadRequest(w, r, "id cannot be ''")
+        // This function queries for {{ $n.Name }} models. Can be filtered by query parameters.
+        func(h {{ $n.Name }}Handler) List(w http.ResponseWriter, r *http.Request) {
+            q := h.client.{{ $n.Name }}.Query()
+            {{- range $e := $n.Edges }}
+                {{- range $l := $n.Annotations.HandlerGen.ListEager}}
+                    {{- if eq $l $e.Name }}.With{{ pascal $e.Name }}(){{ end -}}
+                {{ end -}}
+            {{ end }}
+
+            // Pagination. Default is 30 items per page.
+            page, itemsPerPage, err := pagination(w, r, h.logger)
+            if err != nil {
                 return
             }
-            {{ if $n.ID.HasGoType -}}
-                id := {{ $n.ID.Type.String }}(idp)
-            {{ else if $n.ID.IsString -}}
-                id := idp
-            {{ else if $n.ID.IsInt -}}
-                id, err := strconv.Atoi(idp)
-                if err != nil {
-                    h.logger.WithField("id", idp).Info("error parsing url parameter 'id'")
-                    render.BadRequest(w, r, "id must be a positive integer greater zero")
-                    return
-                }
-            {{- end}}
+            q = q.Limit(itemsPerPage).Offset((page - 1) * itemsPerPage)
 
-            e, err := h.client.{{ $n.Name }}.Query().Where({{ $n.Name | snake }}.ID(id)).
-            {{- range $e := $n.Edges }}
-                {{- range $l := $n.Annotations.HandlerGen.ReadEager}}
-                    {{- if eq $l $e.Name }}With{{ pascal $e.Name }}().{{ end -}}
-                {{ end -}}
-            {{ end -}}
-            Only(r.Context())
+            // Use the query parameters to filter the query.
+{{/*            {{ range $f := $n.Fields }}*/}}
+{{/*                if f := r.URL.Query().Get("{{ tagLookup $f.StructTag "json"}}"); f != "" {*/}}
+{{/*                    // {{ $f.BasicType "string" }}*/}}
+{{/*                    q = q.Where({{ $n.Package }}.{{$f.StructField}}(f))*/}}
+{{/*                }*/}}
+{{/*            {{ end }}*/}}
+
+            es, err := q.All(r.Context())
             if err != nil {
-                switch err.(type) {
-                    case *ent.NotFoundError:
-                        h.logger.WithError(err).Debug("job not found")
-                        render.NotFound(w, r, err)
-                        return
-                    case *ent.NotSingularError:
-                        h.logger.WithError(err).Error("unexpected")                  // todo - better error
-                        render.InternalServerError(w, r, "unexpected error occurred") // todo - better error
-                        return
-                    default:
-                        h.logger.WithError(err).Error("logic") // todo - better stuff here pls
-                        render.InternalServerError(w, r, "logic")
-                        return
-                }
+                h.logger.WithError(err).Error("unexpected") // todo - better error
+                render.InternalServerError(w, r, "logic")
+                return
+{{/*                switch err.(type) {*/}}
+{{/*                    case *ent.NotFoundError:*/}}
+{{/*                        h.logger.WithError(err).Debug("job not found")*/}}
+{{/*                        render.NotFound(w, r, err)*/}}
+{{/*                        return*/}}
+{{/*                    case *ent.NotSingularError:*/}}
+{{/*                        h.logger.WithError(err).Error("unexpected")                  // todo - better error*/}}
+{{/*                        render.InternalServerError(w, r, "unexpected error occurred") // todo - better error*/}}
+{{/*                        return*/}}
+{{/*                    default:*/}}
+{{/*                        h.logger.WithError(err).Error("logic") // todo - better stuff here pls*/}}
+{{/*                        render.InternalServerError(w, r, "logic")*/}}
+{{/*                        return*/}}
+{{/*                }*/}}
             }
 
-            h.logger.WithField("job", e.ID).Info("job rendered") // todo - better stuff here pls
-            render.OK(w, r, e)
+            h.logger.WithField("amount", len(es)).Info("jobs rendered") // todo - better stuff here pls
+            render.OK(w, r, es)
         }
 
     {{ end }}
+
+    func pagination(w http.ResponseWriter, r *http.Request, l *logrus.Logger) (page int, itemsPerPage int, err error) {
+        page = 1
+        itemsPerPage = 30
+
+        if d := r.URL.Query().Get("itemsPerPage"); d != "" {
+            itemsPerPage, err = strconv.Atoi(d)
+            if err != nil {
+                l.WithField("itemsPerPage", d).Info("error parsing query parameter 'itemsPerPage'")
+                render.BadRequest(w, r, "itemsPerPage must be a positive integer greater zero")
+                return
+            }
+        }
+
+        if d := r.URL.Query().Get("page"); d != "" {
+            page, err = strconv.Atoi(d)
+            if err != nil {
+                l.WithField("page", d).Info("error parsing query parameter 'page'")
+                render.BadRequest(w, r, "page must be a positive integer greater zero")
+                return
+            }
+        }
+
+        return
+    }
 
 {{end}}

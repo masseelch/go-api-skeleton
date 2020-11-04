@@ -13,36 +13,36 @@ import (
 
 // Job is the model entity for the Job schema.
 type Job struct {
-	config `json:"-"`
+	config `groups:"-" json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID int `json:"id,omitempty" groups:"job:list"`
 	// Date holds the value of the "date" field.
-	Date time.Time `json:"date,omitempty"`
+	Date time.Time `json:"date,omitempty" groups:"job:list"`
 	// Task holds the value of the "task" field.
-	Task string `json:"task,omitempty"`
+	Task string `json:"task,omitempty" groups:"job:list"`
 	// State holds the value of the "state" field.
 	State string `json:"state,omitempty"`
 	// Report holds the value of the "report" field.
-	Report string `json:"report,omitempty"`
+	Report string `json:"report,omitempty" groups:"job:list"`
 	// Rest holds the value of the "rest" field.
-	Rest string `json:"rest,omitempty"`
+	Rest string `json:"rest,omitempty" groups:"job:list"`
 	// Note holds the value of the "note" field.
-	Note string `json:"note,omitempty"`
+	Note string `json:"note,omitempty" groups:"job:list"`
 	// CustomerName holds the value of the "customerName" field.
-	CustomerName string `json:"customerName,omitempty"`
+	CustomerName string `json:"customerName,omitempty" groups:"job:list"`
 	// RiskAssessmentRequired holds the value of the "riskAssessmentRequired" field.
-	RiskAssessmentRequired bool `json:"riskAssessmentRequired,omitempty"`
+	RiskAssessmentRequired bool `json:"riskAssessmentRequired,omitempty" groups:"job:list"`
 	// MaintenanceRequired holds the value of the "maintenanceRequired" field.
-	MaintenanceRequired bool `json:"maintenanceRequired,omitempty"`
+	MaintenanceRequired bool `json:"maintenanceRequired,omitempty" groups:"job:list"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the JobQuery when eager-loading is set.
-	Edges JobEdges `json:"edges"`
+	Edges JobEdges `json:"edges" groups:"job:list"`
 }
 
 // JobEdges holds the relations/edges for other nodes in the graph.
 type JobEdges struct {
 	// Users holds the value of the users edge.
-	Users []*User `json:"users,omitempty"`
+	Users []*User `json:"users,omitempty" groups:"job:list"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool

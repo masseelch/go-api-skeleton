@@ -39,12 +39,19 @@ func (h JobHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // Enable all endpoints.
 func (h *JobHandler) EnableAllEndpoints() *JobHandler {
 	h.EnableReadEndpoint()
+	h.EnableListEndpoint()
 	return h
 }
 
 // Enable the read operation.
 func (h *JobHandler) EnableReadEndpoint() *JobHandler {
 	h.r.Get("/{id:\\d+}", h.Read)
+	return h
+}
+
+// Enable the list operation.
+func (h *JobHandler) EnableListEndpoint() *JobHandler {
+	h.r.Get("/", h.List)
 	return h
 }
 
@@ -75,12 +82,19 @@ func (h SessionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // Enable all endpoints.
 func (h *SessionHandler) EnableAllEndpoints() *SessionHandler {
 	h.EnableReadEndpoint()
+	h.EnableListEndpoint()
 	return h
 }
 
 // Enable the read operation.
 func (h *SessionHandler) EnableReadEndpoint() *SessionHandler {
 	h.r.Get("/{id:\\d+}", h.Read)
+	return h
+}
+
+// Enable the list operation.
+func (h *SessionHandler) EnableListEndpoint() *SessionHandler {
+	h.r.Get("/", h.List)
 	return h
 }
 
@@ -111,11 +125,18 @@ func (h UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // Enable all endpoints.
 func (h *UserHandler) EnableAllEndpoints() *UserHandler {
 	h.EnableReadEndpoint()
+	h.EnableListEndpoint()
 	return h
 }
 
 // Enable the read operation.
 func (h *UserHandler) EnableReadEndpoint() *UserHandler {
 	h.r.Get("/{id:\\d+}", h.Read)
+	return h
+}
+
+// Enable the list operation.
+func (h *UserHandler) EnableListEndpoint() *UserHandler {
+	h.r.Get("/", h.List)
 	return h
 }

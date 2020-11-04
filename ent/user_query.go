@@ -314,7 +314,7 @@ func (uq *UserQuery) WithJobs(opts ...func(*JobQuery)) *UserQuery {
 // Example:
 //
 //	var v []struct {
-//		Email string `json:"email,omitempty"`
+//		Email string `json:"email,omitempty" groups:"user:list"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -340,7 +340,7 @@ func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
 // Example:
 //
 //	var v []struct {
-//		Email string `json:"email,omitempty"`
+//		Email string `json:"email,omitempty" groups:"user:list"`
 //	}
 //
 //	client.User.Query().

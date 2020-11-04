@@ -12,15 +12,15 @@ import (
 
 // User is the model entity for the User schema.
 type User struct {
-	config `json:"-"`
+	config `groups:"-" json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID int `json:"id,omitempty" groups:"user:list"`
 	// Email holds the value of the "email" field.
-	Email string `json:"email,omitempty"`
+	Email string `json:"email,omitempty" groups:"user:list"`
 	// Password holds the value of the "password" field.
-	Password string `json:"-"`
+	Password string `groups:"-" json:"-"`
 	// Enabled holds the value of the "enabled" field.
-	Enabled bool `json:"enabled,omitempty"`
+	Enabled bool `json:"enabled,omitempty" groups:"user:list"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
 	Edges UserEdges `json:"edges" groups:"user:read"`
@@ -31,7 +31,7 @@ type UserEdges struct {
 	// Sessions holds the value of the sessions edge.
 	Sessions []*Session `json:"-"`
 	// Jobs holds the value of the jobs edge.
-	Jobs []*Job `json:"jobs,omitempty"`
+	Jobs []*Job `json:"jobs,omitempty" groups:"user:read"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
