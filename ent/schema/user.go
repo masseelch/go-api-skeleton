@@ -5,6 +5,7 @@ import (
 	"github.com/facebook/ent/schema"
 	"github.com/facebook/ent/schema/edge"
 	"github.com/facebook/ent/schema/field"
+	"regexp"
 )
 
 // User holds the schema definition for the User entity.
@@ -19,6 +20,7 @@ func (User) Fields() []ent.Field {
 			StructTag(`groups:"user:list"`),
 		field.String("email").
 			Unique().
+			Match(regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")).
 			StructTag(`groups:"user:list"`),
 		field.String("password").
 			Sensitive(),

@@ -6,13 +6,13 @@
     {{ end }}
 
     import (
+        "net/http"
+        "strconv"
+
         "github.com/go-chi/chi"
-        "github.com/go-playground/validator/v10"
         "github.com/liip/sheriff"
         "github.com/masseelch/render"
         "github.com/sirupsen/logrus"
-        "net/http"
-        "strconv"
 
         "{{ $.Config.Package }}"
         {{- range $n := $.Nodes}}
@@ -85,7 +85,7 @@
             if err != nil {
                 h.logger.WithError(err).Error("sheriff") // todo - better stuff here pls
                 render.InternalServerError(w, r, "sheriff")
-            return
+                return
             }
 
             h.logger.WithField("{{ $n.Name | snake }}", e.ID).Info("job rendered") // todo - better stuff here pls

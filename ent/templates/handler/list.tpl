@@ -6,12 +6,13 @@
     {{ end }}
 
     import (
-        "github.com/go-chi/chi"
-        "github.com/go-playground/validator/v10"
-        "github.com/masseelch/render"
-        "github.com/sirupsen/logrus"
         "net/http"
         "strconv"
+
+        "github.com/go-chi/chi"
+        "github.com/liip/sheriff"
+        "github.com/masseelch/render"
+        "github.com/sirupsen/logrus"
 
         "{{ $.Config.Package }}"
         {{- range $n := $.Nodes}}
@@ -37,36 +38,60 @@
             q = q.Limit(itemsPerPage).Offset((page - 1) * itemsPerPage)
 
             // Use the query parameters to filter the query.
-{{/*            {{ range $f := $n.Fields }}*/}}
-{{/*                if f := r.URL.Query().Get("{{ tagLookup $f.StructTag "json"}}"); f != "" {*/}}
-{{/*                    // {{ $f.BasicType "string" }}*/}}
-{{/*                    q = q.Where({{ $n.Package }}.{{$f.StructField}}(f))*/}}
-{{/*                }*/}}
-{{/*            {{ end }}*/}}
+            {{- range $f := $n.Fields }}
+                {{- $jsonName := index (split (tagLookup $f.StructTag "json") ",") 0 }}
+                if f := r.URL.Query().Get("{{ $jsonName }}"); f != "" {
+                    {{- if $f.IsBool }}
+                        var b bool
+                        if f == "true" {
+                            b = true
+                        } else if f == "false" {
+                            b = false
+                        } else {
+                            h.logger.WithError(err).Error("unexpected") // todo - better error
+                            render.BadRequest(w, r, "'{{ $jsonName }}' must be 'true' or 'false'")
+                            return
+                        }
+                        q = q.Where({{ $n.Package }}.{{$f.StructField}}(b))
+                    {{ else if $f.IsInt }}
+                        i, err := strconv.Atoi(f)
+                        if err != nil {
+                            h.logger.WithError(err).Error("unexpected") // todo - better error
+                            render.BadRequest(w, r, "'{{ $jsonName }}' must be an integer")
+                            return
+                        }
+                        q = q.Where({{ $n.Package }}.{{$f.StructField}}(i))
+                    {{ else if $f.IsString }}
+                        q = q.Where({{ $n.Package }}.{{$f.StructField}}(f))
+                    {{ else if $f.IsTime }}
+                        // todo
+                    {{ end -}}
+                }
+            {{ end }}
 
             es, err := q.All(r.Context())
             if err != nil {
                 h.logger.WithError(err).Error("unexpected") // todo - better error
                 render.InternalServerError(w, r, "logic")
                 return
-{{/*                switch err.(type) {*/}}
-{{/*                    case *ent.NotFoundError:*/}}
-{{/*                        h.logger.WithError(err).Debug("job not found")*/}}
-{{/*                        render.NotFound(w, r, err)*/}}
-{{/*                        return*/}}
-{{/*                    case *ent.NotSingularError:*/}}
-{{/*                        h.logger.WithError(err).Error("unexpected")                  // todo - better error*/}}
-{{/*                        render.InternalServerError(w, r, "unexpected error occurred") // todo - better error*/}}
-{{/*                        return*/}}
-{{/*                    default:*/}}
-{{/*                        h.logger.WithError(err).Error("logic") // todo - better stuff here pls*/}}
-{{/*                        render.InternalServerError(w, r, "logic")*/}}
-{{/*                        return*/}}
-{{/*                }*/}}
+            }
+
+            {{ $groups := $n.Annotations.HandlerGen.ReadGroups }}
+            d, err := sheriff.Marshal(&sheriff.Options{Groups: []string{
+                {{- if $groups }}
+                    {{- range $g := $groups}}"{{$g}}",{{ end -}}
+                {{ else -}}
+                    "{{ $n.Name | snake }}:list"
+                {{- end -}}
+            }}, es)
+            if err != nil {
+                h.logger.WithError(err).Error("sheriff") // todo - better stuff here pls
+                render.InternalServerError(w, r, "sheriff")
+                return
             }
 
             h.logger.WithField("amount", len(es)).Info("jobs rendered") // todo - better stuff here pls
-            render.OK(w, r, es)
+            render.OK(w, r, d)
         }
 
     {{ end }}

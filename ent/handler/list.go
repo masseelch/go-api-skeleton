@@ -6,8 +6,12 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/liip/sheriff"
 	"github.com/masseelch/render"
 	"github.com/sirupsen/logrus"
+
+	"github.com/masseelch/go-api-skeleton/ent/job"
+	"github.com/masseelch/go-api-skeleton/ent/user"
 )
 
 // This function queries for Job models. Can be filtered by query parameters.
@@ -22,17 +26,78 @@ func (h JobHandler) List(w http.ResponseWriter, r *http.Request) {
 	q = q.Limit(itemsPerPage).Offset((page - 1) * itemsPerPage)
 
 	// Use the query parameters to filter the query.
+	if f := r.URL.Query().Get("date"); f != "" {
+		// todo
+	}
+
+	if f := r.URL.Query().Get("task"); f != "" {
+		q = q.Where(job.Task(f))
+	}
+
+	if f := r.URL.Query().Get("state"); f != "" {
+		q = q.Where(job.State(f))
+	}
+
+	if f := r.URL.Query().Get("report"); f != "" {
+		q = q.Where(job.Report(f))
+	}
+
+	if f := r.URL.Query().Get("rest"); f != "" {
+		q = q.Where(job.Rest(f))
+	}
+
+	if f := r.URL.Query().Get("note"); f != "" {
+		q = q.Where(job.Note(f))
+	}
+
+	if f := r.URL.Query().Get("customerName"); f != "" {
+		q = q.Where(job.CustomerName(f))
+	}
+
+	if f := r.URL.Query().Get("riskAssessmentRequired"); f != "" {
+		var b bool
+		if f == "true" {
+			b = true
+		} else if f == "false" {
+			b = false
+		} else {
+			h.logger.WithError(err).Error("unexpected") // todo - better error
+			render.BadRequest(w, r, "'riskAssessmentRequired' must be 'true' or 'false'")
+			return
+		}
+		q = q.Where(job.RiskAssessmentRequired(b))
+	}
+
+	if f := r.URL.Query().Get("maintenanceRequired"); f != "" {
+		var b bool
+		if f == "true" {
+			b = true
+		} else if f == "false" {
+			b = false
+		} else {
+			h.logger.WithError(err).Error("unexpected") // todo - better error
+			render.BadRequest(w, r, "'maintenanceRequired' must be 'true' or 'false'")
+			return
+		}
+		q = q.Where(job.MaintenanceRequired(b))
+	}
 
 	es, err := q.All(r.Context())
 	if err != nil {
 		h.logger.WithError(err).Error("unexpected") // todo - better error
 		render.InternalServerError(w, r, "logic")
 		return
+	}
 
+	d, err := sheriff.Marshal(&sheriff.Options{Groups: []string{"job:list", "user:list"}}, es)
+	if err != nil {
+		h.logger.WithError(err).Error("sheriff") // todo - better stuff here pls
+		render.InternalServerError(w, r, "sheriff")
+		return
 	}
 
 	h.logger.WithField("amount", len(es)).Info("jobs rendered") // todo - better stuff here pls
-	render.OK(w, r, es)
+	render.OK(w, r, d)
 }
 
 // This function queries for Session models. Can be filtered by query parameters.
@@ -47,17 +112,30 @@ func (h SessionHandler) List(w http.ResponseWriter, r *http.Request) {
 	q = q.Limit(itemsPerPage).Offset((page - 1) * itemsPerPage)
 
 	// Use the query parameters to filter the query.
+	if f := r.URL.Query().Get("idleTimeExpiredAt"); f != "" {
+		// todo
+	}
+
+	if f := r.URL.Query().Get("lifeTimeExpiredAt"); f != "" {
+		// todo
+	}
 
 	es, err := q.All(r.Context())
 	if err != nil {
 		h.logger.WithError(err).Error("unexpected") // todo - better error
 		render.InternalServerError(w, r, "logic")
 		return
+	}
 
+	d, err := sheriff.Marshal(&sheriff.Options{Groups: []string{"session:list"}}, es)
+	if err != nil {
+		h.logger.WithError(err).Error("sheriff") // todo - better stuff here pls
+		render.InternalServerError(w, r, "sheriff")
+		return
 	}
 
 	h.logger.WithField("amount", len(es)).Info("jobs rendered") // todo - better stuff here pls
-	render.OK(w, r, es)
+	render.OK(w, r, d)
 }
 
 // This function queries for User models. Can be filtered by query parameters.
@@ -72,17 +150,44 @@ func (h UserHandler) List(w http.ResponseWriter, r *http.Request) {
 	q = q.Limit(itemsPerPage).Offset((page - 1) * itemsPerPage)
 
 	// Use the query parameters to filter the query.
+	if f := r.URL.Query().Get("email"); f != "" {
+		q = q.Where(user.Email(f))
+	}
+
+	if f := r.URL.Query().Get("password"); f != "" {
+		q = q.Where(user.Password(f))
+	}
+
+	if f := r.URL.Query().Get("enabled"); f != "" {
+		var b bool
+		if f == "true" {
+			b = true
+		} else if f == "false" {
+			b = false
+		} else {
+			h.logger.WithError(err).Error("unexpected") // todo - better error
+			render.BadRequest(w, r, "'enabled' must be 'true' or 'false'")
+			return
+		}
+		q = q.Where(user.Enabled(b))
+	}
 
 	es, err := q.All(r.Context())
 	if err != nil {
 		h.logger.WithError(err).Error("unexpected") // todo - better error
 		render.InternalServerError(w, r, "logic")
 		return
+	}
 
+	d, err := sheriff.Marshal(&sheriff.Options{Groups: []string{"user:list"}}, es)
+	if err != nil {
+		h.logger.WithError(err).Error("sheriff") // todo - better stuff here pls
+		render.InternalServerError(w, r, "sheriff")
+		return
 	}
 
 	h.logger.WithField("amount", len(es)).Info("jobs rendered") // todo - better stuff here pls
-	render.OK(w, r, es)
+	render.OK(w, r, d)
 }
 
 func pagination(w http.ResponseWriter, r *http.Request, l *logrus.Logger) (page int, itemsPerPage int, err error) {

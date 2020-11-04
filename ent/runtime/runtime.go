@@ -5,6 +5,6 @@ package runtime
 // The schema-stitching logic is generated in github.com/masseelch/go-api-skeleton/ent/runtime.go
 
 const (
-	Version = "v0.4.4-0.20201028204823-2bd262a04cf0"            // Version of ent codegen.
-	Sum     = "h1:lvRU/xSZxRzzvkLjYVNjKhoBRZrgSTAWaj/TafoeYmI=" // Sum of ent codegen.
+	Version = "v0.5.0"                                          // Version of ent codegen.
+	Sum     = "h1:NlDQDxJi1X6+20CCjRQgu8UqvRhQNm5ocPBCQYdxC/8=" // Sum of ent codegen.
 )
