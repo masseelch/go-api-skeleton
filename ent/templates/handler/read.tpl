@@ -60,16 +60,16 @@
             if err != nil {
                 switch err.(type) {
                     case *ent.NotFoundError:
-                        h.logger.WithError(err).Debug("job not found")
+                        h.logger.WithError(err).WithField("{{ $n.Name }}.{{ $n.ID.Name }}", id).Debug("job not found")
                         render.NotFound(w, r, err)
                         return
                     case *ent.NotSingularError:
-                        h.logger.WithError(err).Error("unexpected")                  // todo - better error
-                        render.InternalServerError(w, r, "unexpected error occurred") // todo - better error
+                        h.logger.WithError(err).WithField("{{ $n.Name }}.{{ $n.ID.Name }}", id).Error("duplicate entry for id")
+                        render.InternalServerError(w, r)
                         return
                     default:
-                        h.logger.WithError(err).Error("logic") // todo - better stuff here pls
-                        render.InternalServerError(w, r, "logic")
+                        h.logger.WithError(err).WithField("{{ $n.Name }}.{{ $n.ID.Name }}", id).Error("error fetching node from db")
+                        render.InternalServerError(w, r)
                         return
                 }
             }
@@ -83,12 +83,12 @@
                 {{- end -}}
             }}, e)
             if err != nil {
-                h.logger.WithError(err).Error("sheriff") // todo - better stuff here pls
-                render.InternalServerError(w, r, "sheriff")
+                h.logger.WithError(err).WithField("{{ $n.Name }}.{{ $n.ID.Name }}", id).Error("serialization error")
+                render.InternalServerError(w, r)
                 return
             }
 
-            h.logger.WithField("{{ $n.Name | snake }}", e.ID).Info("job rendered") // todo - better stuff here pls
+            h.logger.WithField("{{ $n.Name | snake }}", e.ID).Info("job rendered")
             render.OK(w, r, d)
         }
 

@@ -61,7 +61,7 @@ func (h JobHandler) List(w http.ResponseWriter, r *http.Request) {
 		} else if f == "false" {
 			b = false
 		} else {
-			h.logger.WithError(err).Error("unexpected") // todo - better error
+			h.logger.WithError(err).WithField("riskAssessmentRequired", f).Debug("could not parse query parameter")
 			render.BadRequest(w, r, "'riskAssessmentRequired' must be 'true' or 'false'")
 			return
 		}
@@ -75,7 +75,7 @@ func (h JobHandler) List(w http.ResponseWriter, r *http.Request) {
 		} else if f == "false" {
 			b = false
 		} else {
-			h.logger.WithError(err).Error("unexpected") // todo - better error
+			h.logger.WithError(err).WithField("maintenanceRequired", f).Debug("could not parse query parameter")
 			render.BadRequest(w, r, "'maintenanceRequired' must be 'true' or 'false'")
 			return
 		}
@@ -84,19 +84,19 @@ func (h JobHandler) List(w http.ResponseWriter, r *http.Request) {
 
 	es, err := q.All(r.Context())
 	if err != nil {
-		h.logger.WithError(err).Error("unexpected") // todo - better error
-		render.InternalServerError(w, r, "logic")
+		h.logger.WithError(err).Error("error querying database") // todo - better error
+		render.InternalServerError(w, r)
 		return
 	}
 
 	d, err := sheriff.Marshal(&sheriff.Options{Groups: []string{"job:list", "user:list"}}, es)
 	if err != nil {
-		h.logger.WithError(err).Error("sheriff") // todo - better stuff here pls
-		render.InternalServerError(w, r, "sheriff")
+		h.logger.WithError(err).Error("serialization error")
+		render.InternalServerError(w, r)
 		return
 	}
 
-	h.logger.WithField("amount", len(es)).Info("jobs rendered") // todo - better stuff here pls
+	h.logger.WithField("amount", len(es)).Info("jobs rendered")
 	render.OK(w, r, d)
 }
 
@@ -122,19 +122,19 @@ func (h SessionHandler) List(w http.ResponseWriter, r *http.Request) {
 
 	es, err := q.All(r.Context())
 	if err != nil {
-		h.logger.WithError(err).Error("unexpected") // todo - better error
-		render.InternalServerError(w, r, "logic")
+		h.logger.WithError(err).Error("error querying database") // todo - better error
+		render.InternalServerError(w, r)
 		return
 	}
 
 	d, err := sheriff.Marshal(&sheriff.Options{Groups: []string{"session:list"}}, es)
 	if err != nil {
-		h.logger.WithError(err).Error("sheriff") // todo - better stuff here pls
-		render.InternalServerError(w, r, "sheriff")
+		h.logger.WithError(err).Error("serialization error")
+		render.InternalServerError(w, r)
 		return
 	}
 
-	h.logger.WithField("amount", len(es)).Info("jobs rendered") // todo - better stuff here pls
+	h.logger.WithField("amount", len(es)).Info("jobs rendered")
 	render.OK(w, r, d)
 }
 
@@ -165,7 +165,7 @@ func (h UserHandler) List(w http.ResponseWriter, r *http.Request) {
 		} else if f == "false" {
 			b = false
 		} else {
-			h.logger.WithError(err).Error("unexpected") // todo - better error
+			h.logger.WithError(err).WithField("enabled", f).Debug("could not parse query parameter")
 			render.BadRequest(w, r, "'enabled' must be 'true' or 'false'")
 			return
 		}
@@ -174,19 +174,19 @@ func (h UserHandler) List(w http.ResponseWriter, r *http.Request) {
 
 	es, err := q.All(r.Context())
 	if err != nil {
-		h.logger.WithError(err).Error("unexpected") // todo - better error
-		render.InternalServerError(w, r, "logic")
+		h.logger.WithError(err).Error("error querying database") // todo - better error
+		render.InternalServerError(w, r)
 		return
 	}
 
 	d, err := sheriff.Marshal(&sheriff.Options{Groups: []string{"user:list"}}, es)
 	if err != nil {
-		h.logger.WithError(err).Error("sheriff") // todo - better stuff here pls
-		render.InternalServerError(w, r, "sheriff")
+		h.logger.WithError(err).Error("serialization error")
+		render.InternalServerError(w, r)
 		return
 	}
 
-	h.logger.WithField("amount", len(es)).Info("jobs rendered") // todo - better stuff here pls
+	h.logger.WithField("amount", len(es)).Info("jobs rendered")
 	render.OK(w, r, d)
 }
 

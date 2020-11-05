@@ -48,7 +48,7 @@
                         } else if f == "false" {
                             b = false
                         } else {
-                            h.logger.WithError(err).Error("unexpected") // todo - better error
+                            h.logger.WithError(err).WithField("{{ $jsonName }}", f).Debug("could not parse query parameter")
                             render.BadRequest(w, r, "'{{ $jsonName }}' must be 'true' or 'false'")
                             return
                         }
@@ -56,7 +56,7 @@
                     {{ else if $f.IsInt }}
                         i, err := strconv.Atoi(f)
                         if err != nil {
-                            h.logger.WithError(err).Error("unexpected") // todo - better error
+                            h.logger.WithError(err).WithField("{{ $jsonName }}", f).Debug("could not parse query parameter")
                             render.BadRequest(w, r, "'{{ $jsonName }}' must be an integer")
                             return
                         }
@@ -71,8 +71,8 @@
 
             es, err := q.All(r.Context())
             if err != nil {
-                h.logger.WithError(err).Error("unexpected") // todo - better error
-                render.InternalServerError(w, r, "logic")
+                h.logger.WithError(err).Error("error querying database") // todo - better error
+                render.InternalServerError(w, r)
                 return
             }
 
@@ -85,12 +85,12 @@
                 {{- end -}}
             }}, es)
             if err != nil {
-                h.logger.WithError(err).Error("sheriff") // todo - better stuff here pls
-                render.InternalServerError(w, r, "sheriff")
+                h.logger.WithError(err).Error("serialization error")
+                render.InternalServerError(w, r)
                 return
             }
 
-            h.logger.WithField("amount", len(es)).Info("jobs rendered") // todo - better stuff here pls
+            h.logger.WithField("amount", len(es)).Info("jobs rendered")
             render.OK(w, r, d)
         }
 

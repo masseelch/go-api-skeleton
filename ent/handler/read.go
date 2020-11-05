@@ -38,28 +38,28 @@ func (h JobHandler) Read(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err.(type) {
 		case *ent.NotFoundError:
-			h.logger.WithError(err).Debug("job not found")
+			h.logger.WithError(err).WithField("Job.id", id).Debug("job not found")
 			render.NotFound(w, r, err)
 			return
 		case *ent.NotSingularError:
-			h.logger.WithError(err).Error("unexpected")                   // todo - better error
-			render.InternalServerError(w, r, "unexpected error occurred") // todo - better error
+			h.logger.WithError(err).WithField("Job.id", id).Error("duplicate entry for id")
+			render.InternalServerError(w, r)
 			return
 		default:
-			h.logger.WithError(err).Error("logic") // todo - better stuff here pls
-			render.InternalServerError(w, r, "logic")
+			h.logger.WithError(err).WithField("Job.id", id).Error("error fetching node from db")
+			render.InternalServerError(w, r)
 			return
 		}
 	}
 
 	d, err := sheriff.Marshal(&sheriff.Options{Groups: []string{"job:list", "user:list"}}, e)
 	if err != nil {
-		h.logger.WithError(err).Error("sheriff") // todo - better stuff here pls
-		render.InternalServerError(w, r, "sheriff")
+		h.logger.WithError(err).WithField("Job.id", id).Error("serialization error")
+		render.InternalServerError(w, r)
 		return
 	}
 
-	h.logger.WithField("job", e.ID).Info("job rendered") // todo - better stuff here pls
+	h.logger.WithField("job", e.ID).Info("job rendered")
 	render.OK(w, r, d)
 }
 
@@ -78,28 +78,28 @@ func (h SessionHandler) Read(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err.(type) {
 		case *ent.NotFoundError:
-			h.logger.WithError(err).Debug("job not found")
+			h.logger.WithError(err).WithField("Session.id", id).Debug("job not found")
 			render.NotFound(w, r, err)
 			return
 		case *ent.NotSingularError:
-			h.logger.WithError(err).Error("unexpected")                   // todo - better error
-			render.InternalServerError(w, r, "unexpected error occurred") // todo - better error
+			h.logger.WithError(err).WithField("Session.id", id).Error("duplicate entry for id")
+			render.InternalServerError(w, r)
 			return
 		default:
-			h.logger.WithError(err).Error("logic") // todo - better stuff here pls
-			render.InternalServerError(w, r, "logic")
+			h.logger.WithError(err).WithField("Session.id", id).Error("error fetching node from db")
+			render.InternalServerError(w, r)
 			return
 		}
 	}
 
 	d, err := sheriff.Marshal(&sheriff.Options{Groups: []string{"session:list"}}, e)
 	if err != nil {
-		h.logger.WithError(err).Error("sheriff") // todo - better stuff here pls
-		render.InternalServerError(w, r, "sheriff")
+		h.logger.WithError(err).WithField("Session.id", id).Error("serialization error")
+		render.InternalServerError(w, r)
 		return
 	}
 
-	h.logger.WithField("session", e.ID).Info("job rendered") // todo - better stuff here pls
+	h.logger.WithField("session", e.ID).Info("job rendered")
 	render.OK(w, r, d)
 }
 
@@ -123,27 +123,27 @@ func (h UserHandler) Read(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err.(type) {
 		case *ent.NotFoundError:
-			h.logger.WithError(err).Debug("job not found")
+			h.logger.WithError(err).WithField("User.id", id).Debug("job not found")
 			render.NotFound(w, r, err)
 			return
 		case *ent.NotSingularError:
-			h.logger.WithError(err).Error("unexpected")                   // todo - better error
-			render.InternalServerError(w, r, "unexpected error occurred") // todo - better error
+			h.logger.WithError(err).WithField("User.id", id).Error("duplicate entry for id")
+			render.InternalServerError(w, r)
 			return
 		default:
-			h.logger.WithError(err).Error("logic") // todo - better stuff here pls
-			render.InternalServerError(w, r, "logic")
+			h.logger.WithError(err).WithField("User.id", id).Error("error fetching node from db")
+			render.InternalServerError(w, r)
 			return
 		}
 	}
 
 	d, err := sheriff.Marshal(&sheriff.Options{Groups: []string{"user:list"}}, e)
 	if err != nil {
-		h.logger.WithError(err).Error("sheriff") // todo - better stuff here pls
-		render.InternalServerError(w, r, "sheriff")
+		h.logger.WithError(err).WithField("User.id", id).Error("serialization error")
+		render.InternalServerError(w, r)
 		return
 	}
 
-	h.logger.WithField("user", e.ID).Info("job rendered") // todo - better stuff here pls
+	h.logger.WithField("user", e.ID).Info("job rendered")
 	render.OK(w, r, d)
 }
