@@ -278,7 +278,7 @@ func (jq *JobQuery) WithUsers(opts ...func(*UserQuery)) *JobQuery {
 // Example:
 //
 //	var v []struct {
-//		Date time.Time `json:"date,omitempty" groups:"job:list"`
+//		Date time.Time `json:"date,omitempty" groups:"job:list,job:read"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -304,7 +304,7 @@ func (jq *JobQuery) GroupBy(field string, fields ...string) *JobGroupBy {
 // Example:
 //
 //	var v []struct {
-//		Date time.Time `json:"date,omitempty" groups:"job:list"`
+//		Date time.Time `json:"date,omitempty" groups:"job:list,job:read"`
 //	}
 //
 //	client.Job.Query().

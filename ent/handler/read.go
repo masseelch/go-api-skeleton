@@ -99,7 +99,7 @@ func (h SessionHandler) Read(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.logger.WithField("session", e.ID).Info("job rendered")
+	h.logger.WithField("session", e.ID).Info("session rendered")
 	render.OK(w, r, d)
 }
 
@@ -144,6 +144,6 @@ func (h UserHandler) Read(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.logger.WithField("user", e.ID).Info("job rendered")
+	h.logger.WithField("user", e.ID).Info("user rendered")
 	render.OK(w, r, d)
 }

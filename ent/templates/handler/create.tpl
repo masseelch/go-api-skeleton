@@ -35,8 +35,19 @@
                 {{- $a := $f.Annotations.FieldGen }}
                 {{- if or (not $a) $a.Create }}
                     {{ $f.StructField }} {{ $f.Type.String }} `{{ $f.StructTag }}`
+                {{- end }}
+            {{- end }}
+            {{ range $e := $n.Edges -}}
+                {{- $a := $e.Annotations.FieldGen }}
+                {{- if or (not $a) $a.Create }}
+                    {{ if $e.O2O }}
+                    {{ else if $e.O2M }}
+                    {{ else if $e.M2O }}
+                    {{ else if $e.M2M }}
+                        {{ $e.StructField }} {{ if not $e.Unique }}[]{{ end }}{{ $e.Type.ID.Type.String }} {{ with tagLookup $e.StructTag "json" }}`{{ . }}`{{ end }}
+                    {{ end }}
                 {{- end -}}
-            {{ end }}
+            {{- end }}
         }
 
         // This function creates a new {{ $n.Name }} model and stores it in the database.
@@ -64,10 +75,21 @@
 
             // Save the data.
             b := h.client.{{ $n.Name }}.Create()
-            {{ range $f := $n.Fields -}}
+            {{- range $f := $n.Fields -}}
                 {{- $a := $f.Annotations.FieldGen }}
+                {{- if or (not $a) $a.Create }}.
+                    Set{{ $f.StructField }}(d.{{ $f.StructField }})
+                {{- end -}}
+            {{ end }}
+            {{- range $e := $n.Edges -}}
+                {{- $a := $e.Annotations.FieldGen }}
                 {{- if or (not $a) $a.Create }}
-                    b = b.Set{{ $f.StructField }}(d.{{ $f.StructField }})
+                    {{- if $e.O2O }}
+                    {{- else if $e.O2M }}
+                    {{- else if $e.M2O }}
+                    {{- else if $e.M2M }}.
+                        Add{{ $e.Type.Name }}IDs(d.{{ $e.StructField }}...)
+                    {{- end }}
                 {{- end -}}
             {{ end }}
 
@@ -79,12 +101,13 @@
                 return
             }
 
-            {{ $groups := $n.Annotations.HandlerGen.CreateGroups }}
+            // Serialize the data.
+            {{- $groups := $n.Annotations.HandlerGen.CreateGroups }}
             j, err := sheriff.Marshal(&sheriff.Options{Groups: []string{
                 {{- if $groups }}
                     {{- range $g := $groups}}"{{$g}}",{{ end -}}
                 {{ else -}}
-                    "{{ $n.Name | snake }}:create"
+                    "{{ $n.Name | snake }}:read"
                 {{- end -}}
             }}, e)
             if err != nil {
