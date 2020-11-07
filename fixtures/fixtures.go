@@ -9,6 +9,7 @@ import (
 const (
 	userKey = iota
 	jobKey
+	groupKey
 )
 
 type refs map[uint]interface{}
@@ -17,6 +18,9 @@ func Load(c *ent.Client) error {
 	rand.Seed(time.Now().Unix())
 	refs := make(refs)
 
+	if err := groups(refs, c); err != nil {
+		return err
+	}
 	if err := users(refs, c); err != nil {
 		return err
 	}

@@ -35,7 +35,7 @@ type UserEdges struct {
 	// Jobs holds the value of the jobs edge.
 	Jobs []*Job `json:"jobs,omitempty" groups:"user:read"`
 	// Group holds the value of the group edge.
-	Group *Group
+	Group *Group `json:"group,omitempty" groups:"user:read"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [3]bool

@@ -40,7 +40,9 @@ func (User) Edges() []ent.Edge {
 			StructTag(`json:"jobs,omitempty" groups:"user:read"`).
 			Annotations(FieldAnnotation{Create: false}),
 		edge.From("group", Group.Type).
-			Ref("users").Unique(),
+			Ref("users").
+			Unique().
+			StructTag(`json:"group,omitempty" groups:"user:read"`),
 	}
 }
 

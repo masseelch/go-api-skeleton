@@ -39,7 +39,7 @@
                         {{ $f.StructField }} {{ $f.Type.String }} `{{ $f.StructTag }}`
                     {{- end }}
                 {{- end }}
-                {{ range $e := $n.Edges -}}
+                {{- range $e := $n.Edges -}}
                     {{- $a := $e.Annotations.FieldGen }}
                     {{- if and (not $e.Type.Annotations.HandlerGen.SkipGeneration) (or (not $a) $a.Create) }}
                         {{ $e.StructField }} {{ if not $e.Unique }}[]{{ end }}{{ $e.Type.ID.Type.String }} {{ with tagLookup $e.StructTag "json" }}`{{ . }}`{{ end }}
@@ -82,7 +82,7 @@
                     {{- $a := $e.Annotations.FieldGen }}
                     {{- if and (not $e.Type.Annotations.HandlerGen.SkipGeneration) (or (not $a) $a.Create) }}.
                         {{- if $e.Unique }}
-                            Set{{ $e.Type.Name }}(d.{{ $e.StructField }})
+                            Set{{ $e.Type.Name }}ID(d.{{ $e.StructField }})
                         {{- else }}
                             Add{{ $e.Type.Name }}IDs(d.{{ $e.StructField }}...)
                         {{- end }}

@@ -15,7 +15,6 @@ import (
 // struct to bind the post body to.
 type groupCreateRequest struct {
 	Title string `json:"title,omitempty"`
-
 	Users []int
 }
 
@@ -78,8 +77,7 @@ type jobCreateRequest struct {
 	CustomerName           string    `json:"customerName,omitempty" groups:"job:list,job:read"`
 	RiskAssessmentRequired bool      `json:"riskAssessmentRequired,omitempty" groups:"job:list,job:read"`
 	MaintenanceRequired    bool      `json:"maintenanceRequired,omitempty" groups:"job:list,job:read"`
-
-	Users []int `users,omitempty`
+	Users                  []int     `users,omitempty`
 }
 
 // This function creates a new Job model and stores it in the database.
@@ -143,8 +141,7 @@ type userCreateRequest struct {
 	Email    string `json:"email,omitempty" groups:"user:list"`
 	Password string `json:"password,omitempty"`
 	Enabled  bool   `json:"enabled,omitempty" groups:"user:list"`
-
-	Group int
+	Group    int    `group,omitempty`
 }
 
 // This function creates a new User model and stores it in the database.
@@ -175,7 +172,7 @@ func (h UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 		SetEmail(d.Email).
 		SetPassword(d.Password).
 		SetEnabled(d.Enabled).
-		SetGroup(d.Group)
+		SetGroupID(d.Group)
 
 	// Store in database.
 	e, err := b.Save(r.Context())
