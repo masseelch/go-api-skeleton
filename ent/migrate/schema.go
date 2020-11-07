@@ -8,6 +8,18 @@ import (
 )
 
 var (
+	// GroupsColumns holds the columns for the "groups" table.
+	GroupsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "title", Type: field.TypeString, Unique: true},
+	}
+	// GroupsTable holds the schema information for the "groups" table.
+	GroupsTable = &schema.Table{
+		Name:        "groups",
+		Columns:     GroupsColumns,
+		PrimaryKey:  []*schema.Column{GroupsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
+	}
 	// JobsColumns holds the columns for the "jobs" table.
 	JobsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -56,13 +68,22 @@ var (
 		{Name: "email", Type: field.TypeString, Unique: true},
 		{Name: "password", Type: field.TypeString},
 		{Name: "enabled", Type: field.TypeBool},
+		{Name: "group_users", Type: field.TypeInt, Nullable: true},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
-		Name:        "users",
-		Columns:     UsersColumns,
-		PrimaryKey:  []*schema.Column{UsersColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
+		Name:       "users",
+		Columns:    UsersColumns,
+		PrimaryKey: []*schema.Column{UsersColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:  "users_groups_users",
+				Columns: []*schema.Column{UsersColumns[4]},
+
+				RefColumns: []*schema.Column{GroupsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 	}
 	// JobUsersColumns holds the columns for the "job_users" table.
 	JobUsersColumns = []*schema.Column{
@@ -93,6 +114,7 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		GroupsTable,
 		JobsTable,
 		SessionsTable,
 		UsersTable,
@@ -102,6 +124,7 @@ var (
 
 func init() {
 	SessionsTable.ForeignKeys[0].RefTable = UsersTable
+	UsersTable.ForeignKeys[0].RefTable = GroupsTable
 	JobUsersTable.ForeignKeys[0].RefTable = JobsTable
 	JobUsersTable.ForeignKeys[1].RefTable = UsersTable
 }

@@ -37,7 +37,10 @@ func (User) Edges() []ent.Edge {
 			StructTag(`json:"-"`),
 		edge.From("jobs", Job.Type).
 			Ref("users").
-			StructTag(`json:"jobs,omitempty" groups:"user:read"`),
+			StructTag(`json:"jobs,omitempty" groups:"user:read"`).
+			Annotations(FieldAnnotation{Create: false}),
+		edge.From("group", Group.Type).
+			Ref("users").Unique(),
 	}
 }
 
@@ -47,8 +50,5 @@ func (User) Annotations() []schema.Annotation {
 		edge.Annotation{
 			StructTag: `json:"edges" groups:"user:read"`,
 		},
-		// HandlerAnnotation{
-		// 	ReadEager:    []string{"users"},
-		// },
 	}
 }

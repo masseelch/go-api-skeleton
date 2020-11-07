@@ -3,10 +3,11 @@ package schema
 type (
 	// Used on a schema to pass options to the handler generator.
 	HandlerAnnotation struct {
-		CreateGroups []string
-		ListGroups   []string
-		ReadGroups   []string
-		UpdateGroups []string
+		SkipGeneration bool
+		CreateGroups   []string
+		ListGroups     []string
+		ReadGroups     []string
+		UpdateGroups   []string
 
 		ReadEager []string
 		ListEager []string

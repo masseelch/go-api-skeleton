@@ -9,6 +9,19 @@ import (
 	"github.com/masseelch/go-api-skeleton/ent"
 )
 
+// The GroupFunc type is an adapter to allow the use of ordinary
+// function as Group mutator.
+type GroupFunc func(context.Context, *ent.GroupMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f GroupFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.GroupMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.GroupMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The JobFunc type is an adapter to allow the use of ordinary
 // function as Job mutator.
 type JobFunc func(context.Context, *ent.JobMutation) (ent.Value, error)

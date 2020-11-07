@@ -6,6 +6,9 @@ import (
 	"github.com/facebook/ent/dialect/sql"
 )
 
+// Group is the predicate function for group builders.
+type Group func(*sql.Selector)
+
 // Job is the predicate function for job builders.
 type Job func(*sql.Selector)
 

@@ -11,6 +11,7 @@ import (
 	"github.com/facebook/ent/schema/field"
 	"github.com/masseelch/go-api-skeleton/ent/user"
 
+	"github.com/masseelch/go-api-skeleton/ent/group"
 	"github.com/masseelch/go-api-skeleton/ent/job"
 	"github.com/masseelch/go-api-skeleton/ent/session"
 	go_token "github.com/masseelch/go-token"
@@ -83,6 +84,25 @@ func (uc *UserCreate) AddJobs(j ...*Job) *UserCreate {
 		ids[i] = j[i].ID
 	}
 	return uc.AddJobIDs(ids...)
+}
+
+// SetGroupID sets the group edge to Group by id.
+func (uc *UserCreate) SetGroupID(id int) *UserCreate {
+	uc.mutation.SetGroupID(id)
+	return uc
+}
+
+// SetNillableGroupID sets the group edge to Group by id if the given value is not nil.
+func (uc *UserCreate) SetNillableGroupID(id *int) *UserCreate {
+	if id != nil {
+		uc = uc.SetGroupID(*id)
+	}
+	return uc
+}
+
+// SetGroup sets the group edge to Group.
+func (uc *UserCreate) SetGroup(g *Group) *UserCreate {
+	return uc.SetGroupID(g.ID)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -246,6 +266,25 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: job.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.GroupIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   user.GroupTable,
+			Columns: []string{user.GroupColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: group.FieldID,
 				},
 			},
 		}

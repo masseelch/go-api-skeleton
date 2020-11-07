@@ -29,97 +29,93 @@
     )
 
     {{ range $n := $.Nodes }}
-        // struct to bind the post body to.
-        type {{ $n.Name | camel }}CreateRequest struct {
-            {{ range $f := $n.Fields -}}
-                {{- $a := $f.Annotations.FieldGen }}
-                {{- if or (not $a) $a.Create }}
-                    {{ $f.StructField }} {{ $f.Type.String }} `{{ $f.StructTag }}`
-                {{- end }}
-            {{- end }}
-            {{ range $e := $n.Edges -}}
-                {{- $a := $e.Annotations.FieldGen }}
-                {{- if or (not $a) $a.Create }}
-                    {{ if $e.O2O }}
-                    {{ else if $e.O2M }}
-                    {{ else if $e.M2O }}
-                    {{ else if $e.M2M }}
-                        {{ $e.StructField }} {{ if not $e.Unique }}[]{{ end }}{{ $e.Type.ID.Type.String }} {{ with tagLookup $e.StructTag "json" }}`{{ . }}`{{ end }}
-                    {{ end }}
-                {{- end -}}
-            {{- end }}
-        }
+        {{ if not $n.Annotations.HandlerGen.SkipGeneration }}
 
-        // This function creates a new {{ $n.Name }} model and stores it in the database.
-        func(h {{ $n.Name }}Handler) Create(w http.ResponseWriter, r *http.Request) {
-            // Get the post data.
-            d := {{ $n.Name | snake }}CreateRequest{} // todo - allow form-url-encdoded/xml/protobuf data.
-            if err := json.NewDecoder(r.Body).Decode(&d); err != nil {
-                h.logger.WithError(err).Error("error decoding json")
-                render.BadRequest(w, r, "invalid json string")
-                return
+            // struct to bind the post body to.
+            type {{ $n.Name | camel }}CreateRequest struct {
+                {{ range $f := $n.Fields -}}
+                    {{- $a := $f.Annotations.FieldGen }}
+                    {{- if or (not $a) $a.Create }}
+                        {{ $f.StructField }} {{ $f.Type.String }} `{{ $f.StructTag }}`
+                    {{- end }}
+                {{- end }}
+                {{ range $e := $n.Edges -}}
+                    {{- $a := $e.Annotations.FieldGen }}
+                    {{- if and (not $e.Type.Annotations.HandlerGen.SkipGeneration) (or (not $a) $a.Create) }}
+                        {{ $e.StructField }} {{ if not $e.Unique }}[]{{ end }}{{ $e.Type.ID.Type.String }} {{ with tagLookup $e.StructTag "json" }}`{{ . }}`{{ end }}
+                    {{- end -}}
+                {{- end }}
             }
 
-            // Validate the data.
-            if err := h.validator.Struct(d); err != nil {
-                if err, ok := err.(*validator.InvalidValidationError); ok {
-                    h.logger.WithError(err).Error("error validating request data")
+            // This function creates a new {{ $n.Name }} model and stores it in the database.
+            func(h {{ $n.Name }}Handler) Create(w http.ResponseWriter, r *http.Request) {
+                // Get the post data.
+                d := {{ $n.Name | snake }}CreateRequest{} // todo - allow form-url-encdoded/xml/protobuf data.
+                if err := json.NewDecoder(r.Body).Decode(&d); err != nil {
+                    h.logger.WithError(err).Error("error decoding json")
+                    render.BadRequest(w, r, "invalid json string")
+                    return
+                }
+
+                // Validate the data.
+                if err := h.validator.Struct(d); err != nil {
+                    if err, ok := err.(*validator.InvalidValidationError); ok {
+                        h.logger.WithError(err).Error("error validating request data")
+                        render.InternalServerError(w, r, nil)
+                        return
+                    }
+
+                    h.logger.WithError(err).Info("validation failed")
+                    render.BadRequest(w, r, err)
+                    return
+                }
+
+                // Save the data.
+                b := h.client.{{ $n.Name }}.Create()
+                {{- range $f := $n.Fields -}}
+                    {{- $a := $f.Annotations.FieldGen }}
+                    {{- if or (not $a) $a.Create }}.
+                        Set{{ $f.StructField }}(d.{{ $f.StructField }})
+                    {{- end -}}
+                {{ end }}
+                {{- range $e := $n.Edges -}}
+                    {{- $a := $e.Annotations.FieldGen }}
+                    {{- if and (not $e.Type.Annotations.HandlerGen.SkipGeneration) (or (not $a) $a.Create) }}.
+                        {{- if $e.Unique }}
+                            Set{{ $e.Type.Name }}(d.{{ $e.StructField }})
+                        {{- else }}
+                            Add{{ $e.Type.Name }}IDs(d.{{ $e.StructField }}...)
+                        {{- end }}
+                    {{- end -}}
+                {{ end }}
+
+                // Store in database.
+                e, err := b.Save(r.Context())
+                if err != nil {
+                    h.logger.WithError(err).Error("error saving {{ $n.Name }}")
                     render.InternalServerError(w, r, nil)
                     return
                 }
 
-                h.logger.WithError(err).Info("validation failed")
-                render.BadRequest(w, r, err)
-                return
+                // Serialize the data.
+                {{- $groups := $n.Annotations.HandlerGen.CreateGroups }}
+                j, err := sheriff.Marshal(&sheriff.Options{Groups: []string{
+                    {{- if $groups }}
+                        {{- range $g := $groups}}"{{$g}}",{{ end -}}
+                    {{ else -}}
+                        "{{ $n.Name | snake }}:read"
+                    {{- end -}}
+                }}, e)
+                if err != nil {
+                    h.logger.WithError(err).WithField("{{ $n.Name }}.{{ $n.ID.Name }}", e.ID).Error("serialization error")
+                    render.InternalServerError(w, r, nil)
+                    return
+                }
+
+                h.logger.WithField("{{ $n.Name | snake }}", e.ID).Info("{{ $n.Name | snake }} rendered")
+                render.OK(w, r, j)
             }
 
-            // Save the data.
-            b := h.client.{{ $n.Name }}.Create()
-            {{- range $f := $n.Fields -}}
-                {{- $a := $f.Annotations.FieldGen }}
-                {{- if or (not $a) $a.Create }}.
-                    Set{{ $f.StructField }}(d.{{ $f.StructField }})
-                {{- end -}}
-            {{ end }}
-            {{- range $e := $n.Edges -}}
-                {{- $a := $e.Annotations.FieldGen }}
-                {{- if or (not $a) $a.Create }}
-                    {{- if $e.O2O }}
-                    {{- else if $e.O2M }}
-                    {{- else if $e.M2O }}
-                    {{- else if $e.M2M }}.
-                        Add{{ $e.Type.Name }}IDs(d.{{ $e.StructField }}...)
-                    {{- end }}
-                {{- end -}}
-            {{ end }}
-
-            // Store in database.
-            e, err := b.Save(r.Context())
-            if err != nil {
-                h.logger.WithError(err).Error("error saving {{ $n.Name }}")
-                render.InternalServerError(w, r, nil)
-                return
-            }
-
-            // Serialize the data.
-            {{- $groups := $n.Annotations.HandlerGen.CreateGroups }}
-            j, err := sheriff.Marshal(&sheriff.Options{Groups: []string{
-                {{- if $groups }}
-                    {{- range $g := $groups}}"{{$g}}",{{ end -}}
-                {{ else -}}
-                    "{{ $n.Name | snake }}:read"
-                {{- end -}}
-            }}, e)
-            if err != nil {
-                h.logger.WithError(err).WithField("{{ $n.Name }}.{{ $n.ID.Name }}", e.ID).Error("serialization error")
-                render.InternalServerError(w, r, nil)
-                return
-            }
-
-            h.logger.WithField("{{ $n.Name | snake }}", e.ID).Info("{{ $n.Name | snake }} rendered")
-            render.OK(w, r, j)
-        }
-
+        {{ end }}
     {{ end }}
-
 {{ end }}

@@ -12,6 +12,7 @@ import (
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/dialect/sql/sqlgraph"
 	"github.com/facebook/ent/schema/field"
+	"github.com/masseelch/go-api-skeleton/ent/group"
 	"github.com/masseelch/go-api-skeleton/ent/job"
 	"github.com/masseelch/go-api-skeleton/ent/predicate"
 	"github.com/masseelch/go-api-skeleton/ent/session"
@@ -29,6 +30,8 @@ type UserQuery struct {
 	// eager-loading edges.
 	withSessions *SessionQuery
 	withJobs     *JobQuery
+	withGroup    *GroupQuery
+	withFKs      bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -95,6 +98,28 @@ func (uq *UserQuery) QueryJobs() *JobQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(job.Table, job.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, user.JobsTable, user.JobsPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryGroup chains the current query on the group edge.
+func (uq *UserQuery) QueryGroup() *GroupQuery {
+	query := &GroupQuery{config: uq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(group.Table, group.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, user.GroupTable, user.GroupColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -280,6 +305,7 @@ func (uq *UserQuery) Clone() *UserQuery {
 		predicates:   append([]predicate.User{}, uq.predicates...),
 		withSessions: uq.withSessions.Clone(),
 		withJobs:     uq.withJobs.Clone(),
+		withGroup:    uq.withGroup.Clone(),
 		// clone intermediate query.
 		sql:  uq.sql.Clone(),
 		path: uq.path,
@@ -305,6 +331,17 @@ func (uq *UserQuery) WithJobs(opts ...func(*JobQuery)) *UserQuery {
 		opt(query)
 	}
 	uq.withJobs = query
+	return uq
+}
+
+//  WithGroup tells the query-builder to eager-loads the nodes that are connected to
+// the "group" edge. The optional arguments used to configure the query builder of the edge.
+func (uq *UserQuery) WithGroup(opts ...func(*GroupQuery)) *UserQuery {
+	query := &GroupQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withGroup = query
 	return uq
 }
 
@@ -373,16 +410,27 @@ func (uq *UserQuery) prepareQuery(ctx context.Context) error {
 func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	var (
 		nodes       = []*User{}
+		withFKs     = uq.withFKs
 		_spec       = uq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [3]bool{
 			uq.withSessions != nil,
 			uq.withJobs != nil,
+			uq.withGroup != nil,
 		}
 	)
+	if uq.withGroup != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, user.ForeignKeys...)
+	}
 	_spec.ScanValues = func() []interface{} {
 		node := &User{config: uq.config}
 		nodes = append(nodes, node)
 		values := node.scanValues()
+		if withFKs {
+			values = append(values, node.fkValues()...)
+		}
 		return values
 	}
 	_spec.Assign = func(values ...interface{}) error {
@@ -489,6 +537,31 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 			}
 			for i := range nodes {
 				nodes[i].Edges.Jobs = append(nodes[i].Edges.Jobs, n)
+			}
+		}
+	}
+
+	if query := uq.withGroup; query != nil {
+		ids := make([]int, 0, len(nodes))
+		nodeids := make(map[int][]*User)
+		for i := range nodes {
+			if fk := nodes[i].group_users; fk != nil {
+				ids = append(ids, *fk)
+				nodeids[*fk] = append(nodeids[*fk], nodes[i])
+			}
+		}
+		query.Where(group.IDIn(ids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "group_users" returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.Group = n
 			}
 		}
 	}

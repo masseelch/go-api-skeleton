@@ -13,6 +13,61 @@ import (
 )
 
 // struct to bind the post body to.
+type groupCreateRequest struct {
+	Title string `json:"title,omitempty"`
+
+	Users []int
+}
+
+// This function creates a new Group model and stores it in the database.
+func (h GroupHandler) Create(w http.ResponseWriter, r *http.Request) {
+	// Get the post data.
+	d := groupCreateRequest{} // todo - allow form-url-encdoded/xml/protobuf data.
+	if err := json.NewDecoder(r.Body).Decode(&d); err != nil {
+		h.logger.WithError(err).Error("error decoding json")
+		render.BadRequest(w, r, "invalid json string")
+		return
+	}
+
+	// Validate the data.
+	if err := h.validator.Struct(d); err != nil {
+		if err, ok := err.(*validator.InvalidValidationError); ok {
+			h.logger.WithError(err).Error("error validating request data")
+			render.InternalServerError(w, r, nil)
+			return
+		}
+
+		h.logger.WithError(err).Info("validation failed")
+		render.BadRequest(w, r, err)
+		return
+	}
+
+	// Save the data.
+	b := h.client.Group.Create().
+		SetTitle(d.Title).
+		AddUserIDs(d.Users...)
+
+	// Store in database.
+	e, err := b.Save(r.Context())
+	if err != nil {
+		h.logger.WithError(err).Error("error saving Group")
+		render.InternalServerError(w, r, nil)
+		return
+	}
+
+	// Serialize the data.
+	j, err := sheriff.Marshal(&sheriff.Options{Groups: []string{"group:read"}}, e)
+	if err != nil {
+		h.logger.WithError(err).WithField("Group.id", e.ID).Error("serialization error")
+		render.InternalServerError(w, r, nil)
+		return
+	}
+
+	h.logger.WithField("group", e.ID).Info("group rendered")
+	render.OK(w, r, j)
+}
+
+// struct to bind the post body to.
 type jobCreateRequest struct {
 	Date                   time.Time `json:"date,omitempty" groups:"job:list,job:read"`
 	Task                   string    `json:"task,omitempty" groups:"job:list,job:read" validate:"required"`
@@ -84,66 +139,12 @@ func (h JobHandler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 // struct to bind the post body to.
-type sessionCreateRequest struct {
-	IdleTimeExpiredAt time.Time `json:"idleTimeExpiredAt,omitempty"`
-	LifeTimeExpiredAt time.Time `json:"lifeTimeExpiredAt,omitempty"`
-}
-
-// This function creates a new Session model and stores it in the database.
-func (h SessionHandler) Create(w http.ResponseWriter, r *http.Request) {
-	// Get the post data.
-	d := sessionCreateRequest{} // todo - allow form-url-encdoded/xml/protobuf data.
-	if err := json.NewDecoder(r.Body).Decode(&d); err != nil {
-		h.logger.WithError(err).Error("error decoding json")
-		render.BadRequest(w, r, "invalid json string")
-		return
-	}
-
-	// Validate the data.
-	if err := h.validator.Struct(d); err != nil {
-		if err, ok := err.(*validator.InvalidValidationError); ok {
-			h.logger.WithError(err).Error("error validating request data")
-			render.InternalServerError(w, r, nil)
-			return
-		}
-
-		h.logger.WithError(err).Info("validation failed")
-		render.BadRequest(w, r, err)
-		return
-	}
-
-	// Save the data.
-	b := h.client.Session.Create().
-		SetIdleTimeExpiredAt(d.IdleTimeExpiredAt).
-		SetLifeTimeExpiredAt(d.LifeTimeExpiredAt)
-
-	// Store in database.
-	e, err := b.Save(r.Context())
-	if err != nil {
-		h.logger.WithError(err).Error("error saving Session")
-		render.InternalServerError(w, r, nil)
-		return
-	}
-
-	// Serialize the data.
-	j, err := sheriff.Marshal(&sheriff.Options{Groups: []string{"session:read"}}, e)
-	if err != nil {
-		h.logger.WithError(err).WithField("Session.id", e.ID).Error("serialization error")
-		render.InternalServerError(w, r, nil)
-		return
-	}
-
-	h.logger.WithField("session", e.ID).Info("session rendered")
-	render.OK(w, r, j)
-}
-
-// struct to bind the post body to.
 type userCreateRequest struct {
 	Email    string `json:"email,omitempty" groups:"user:list"`
 	Password string `json:"password,omitempty"`
 	Enabled  bool   `json:"enabled,omitempty" groups:"user:list"`
 
-	Jobs []int `jobs,omitempty`
+	Group int
 }
 
 // This function creates a new User model and stores it in the database.
@@ -174,7 +175,7 @@ func (h UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 		SetEmail(d.Email).
 		SetPassword(d.Password).
 		SetEnabled(d.Enabled).
-		AddJobIDs(d.Jobs...)
+		SetGroup(d.Group)
 
 	// Store in database.
 	e, err := b.Save(r.Context())

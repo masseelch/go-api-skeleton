@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/facebook/ent/dialect/sql"
+	"github.com/masseelch/go-api-skeleton/ent/group"
 	"github.com/masseelch/go-api-skeleton/ent/user"
 )
 
@@ -23,7 +24,8 @@ type User struct {
 	Enabled bool `json:"enabled,omitempty" groups:"user:list"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
-	Edges UserEdges `json:"edges" groups:"user:read"`
+	Edges       UserEdges `json:"edges" groups:"user:read"`
+	group_users *int
 }
 
 // UserEdges holds the relations/edges for other nodes in the graph.
@@ -32,9 +34,11 @@ type UserEdges struct {
 	Sessions []*Session `json:"-"`
 	// Jobs holds the value of the jobs edge.
 	Jobs []*Job `json:"jobs,omitempty" groups:"user:read"`
+	// Group holds the value of the group edge.
+	Group *Group
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // SessionsOrErr returns the Sessions value or an error if the edge
@@ -55,6 +59,20 @@ func (e UserEdges) JobsOrErr() ([]*Job, error) {
 	return nil, &NotLoadedError{edge: "jobs"}
 }
 
+// GroupOrErr returns the Group value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e UserEdges) GroupOrErr() (*Group, error) {
+	if e.loadedTypes[2] {
+		if e.Group == nil {
+			// The edge group was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: group.Label}
+		}
+		return e.Group, nil
+	}
+	return nil, &NotLoadedError{edge: "group"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*User) scanValues() []interface{} {
 	return []interface{}{
@@ -62,6 +80,13 @@ func (*User) scanValues() []interface{} {
 		&sql.NullString{}, // email
 		&sql.NullString{}, // password
 		&sql.NullBool{},   // enabled
+	}
+}
+
+// fkValues returns the types for scanning foreign-keys values from sql.Rows.
+func (*User) fkValues() []interface{} {
+	return []interface{}{
+		&sql.NullInt64{}, // group_users
 	}
 }
 
@@ -92,6 +117,15 @@ func (u *User) assignValues(values ...interface{}) error {
 	} else if value.Valid {
 		u.Enabled = value.Bool
 	}
+	values = values[3:]
+	if len(values) == len(user.ForeignKeys) {
+		if value, ok := values[0].(*sql.NullInt64); !ok {
+			return fmt.Errorf("unexpected type %T for edge-field group_users", value)
+		} else if value.Valid {
+			u.group_users = new(int)
+			*u.group_users = int(value.Int64)
+		}
+	}
 	return nil
 }
 
@@ -103,6 +137,11 @@ func (u *User) QuerySessions() *SessionQuery {
 // QueryJobs queries the jobs edge of the User.
 func (u *User) QueryJobs() *JobQuery {
 	return (&UserClient{config: u.config}).QueryJobs(u)
+}
+
+// QueryGroup queries the group edge of the User.
+func (u *User) QueryGroup() *GroupQuery {
+	return (&UserClient{config: u.config}).QueryGroup(u)
 }
 
 // Update returns a builder for updating this User.

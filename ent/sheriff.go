@@ -6,6 +6,10 @@ import (
 	"github.com/liip/sheriff"
 )
 
+func (gr *Group) Marshal(options *sheriff.Options) (interface{}, error) {
+	return sheriff.Marshal(options, gr)
+}
+
 func (j *Job) Marshal(options *sheriff.Options) (interface{}, error) {
 	return sheriff.Marshal(options, j)
 }

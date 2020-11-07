@@ -2,6 +2,7 @@ package schema
 
 import (
 	"github.com/facebook/ent"
+	"github.com/facebook/ent/schema"
 	"github.com/facebook/ent/schema/edge"
 	"github.com/facebook/ent/schema/field"
 	"github.com/masseelch/go-token"
@@ -30,5 +31,12 @@ func (Session) Edges() []ent.Edge {
 		edge.From("user", User.Type).
 			Ref("sessions").
 			Unique(),
+	}
+}
+
+// Annotations of the Session.
+func (Session) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		HandlerAnnotation{SkipGeneration: true},
 	}
 }

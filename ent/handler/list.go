@@ -10,9 +10,44 @@ import (
 	"github.com/masseelch/render"
 	"github.com/sirupsen/logrus"
 
+	"github.com/masseelch/go-api-skeleton/ent/group"
 	"github.com/masseelch/go-api-skeleton/ent/job"
 	"github.com/masseelch/go-api-skeleton/ent/user"
 )
+
+// This function queries for Group models. Can be filtered by query parameters.
+func (h GroupHandler) List(w http.ResponseWriter, r *http.Request) {
+	q := h.client.Group.Query()
+
+	// Pagination. Default is 30 items per page.
+	page, itemsPerPage, err := pagination(w, r, h.logger)
+	if err != nil {
+		return
+	}
+	q = q.Limit(itemsPerPage).Offset((page - 1) * itemsPerPage)
+
+	// Use the query parameters to filter the query.
+	if f := r.URL.Query().Get("title"); f != "" {
+		q = q.Where(group.Title(f))
+	}
+
+	es, err := q.All(r.Context())
+	if err != nil {
+		h.logger.WithError(err).Error("error querying database") // todo - better error
+		render.InternalServerError(w, r, nil)
+		return
+	}
+
+	d, err := sheriff.Marshal(&sheriff.Options{Groups: []string{"group:read"}}, es)
+	if err != nil {
+		h.logger.WithError(err).Error("serialization error")
+		render.InternalServerError(w, r, nil)
+		return
+	}
+
+	h.logger.WithField("amount", len(es)).Info("jobs rendered")
+	render.OK(w, r, d)
+}
 
 // This function queries for Job models. Can be filtered by query parameters.
 func (h JobHandler) List(w http.ResponseWriter, r *http.Request) {
@@ -90,44 +125,6 @@ func (h JobHandler) List(w http.ResponseWriter, r *http.Request) {
 	}
 
 	d, err := sheriff.Marshal(&sheriff.Options{Groups: []string{"job:list", "user:list"}}, es)
-	if err != nil {
-		h.logger.WithError(err).Error("serialization error")
-		render.InternalServerError(w, r, nil)
-		return
-	}
-
-	h.logger.WithField("amount", len(es)).Info("jobs rendered")
-	render.OK(w, r, d)
-}
-
-// This function queries for Session models. Can be filtered by query parameters.
-func (h SessionHandler) List(w http.ResponseWriter, r *http.Request) {
-	q := h.client.Session.Query()
-
-	// Pagination. Default is 30 items per page.
-	page, itemsPerPage, err := pagination(w, r, h.logger)
-	if err != nil {
-		return
-	}
-	q = q.Limit(itemsPerPage).Offset((page - 1) * itemsPerPage)
-
-	// Use the query parameters to filter the query.
-	if f := r.URL.Query().Get("idleTimeExpiredAt"); f != "" {
-		// todo
-	}
-
-	if f := r.URL.Query().Get("lifeTimeExpiredAt"); f != "" {
-		// todo
-	}
-
-	es, err := q.All(r.Context())
-	if err != nil {
-		h.logger.WithError(err).Error("error querying database") // todo - better error
-		render.InternalServerError(w, r, nil)
-		return
-	}
-
-	d, err := sheriff.Marshal(&sheriff.Options{Groups: []string{"session:read"}}, es)
 	if err != nil {
 		h.logger.WithError(err).Error("serialization error")
 		render.InternalServerError(w, r, nil)

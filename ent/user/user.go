@@ -18,6 +18,8 @@ const (
 	EdgeSessions = "sessions"
 	// EdgeJobs holds the string denoting the jobs edge name in mutations.
 	EdgeJobs = "jobs"
+	// EdgeGroup holds the string denoting the group edge name in mutations.
+	EdgeGroup = "group"
 
 	// Table holds the table name of the user in the database.
 	Table = "users"
@@ -33,6 +35,13 @@ const (
 	// JobsInverseTable is the table name for the Job entity.
 	// It exists in this package in order to avoid circular dependency with the "job" package.
 	JobsInverseTable = "jobs"
+	// GroupTable is the table the holds the group relation/edge.
+	GroupTable = "users"
+	// GroupInverseTable is the table name for the Group entity.
+	// It exists in this package in order to avoid circular dependency with the "group" package.
+	GroupInverseTable = "groups"
+	// GroupColumn is the table column denoting the group relation/edge.
+	GroupColumn = "group_users"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -41,6 +50,11 @@ var Columns = []string{
 	FieldEmail,
 	FieldPassword,
 	FieldEnabled,
+}
+
+// ForeignKeys holds the SQL foreign-keys that are owned by the User type.
+var ForeignKeys = []string{
+	"group_users",
 }
 
 var (
@@ -53,6 +67,11 @@ var (
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
+			return true
+		}
+	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
 			return true
 		}
 	}

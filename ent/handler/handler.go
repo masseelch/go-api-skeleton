@@ -12,6 +12,56 @@ import (
 	"github.com/masseelch/go-api-skeleton/ent"
 )
 
+// The GroupHandler.
+type GroupHandler struct {
+	r *chi.Mux
+
+	client    *ent.Client
+	validator *validator.Validate
+	logger    *logrus.Logger
+}
+
+// Create a new GroupHandler
+func NewGroupHandler(c *ent.Client, v *validator.Validate, log *logrus.Logger) *GroupHandler {
+	return &GroupHandler{
+		r:         chi.NewRouter(),
+		client:    c,
+		validator: v,
+		logger:    log,
+	}
+}
+
+// Implement the net/http Handler interface.
+func (h GroupHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	h.r.ServeHTTP(w, r)
+}
+
+// Enable all endpoints.
+func (h *GroupHandler) EnableAllEndpoints() *GroupHandler {
+	h.EnableCreateEndpoint()
+	h.EnableReadEndpoint()
+	h.EnableListEndpoint()
+	return h
+}
+
+// Enable the create operation.
+func (h *GroupHandler) EnableCreateEndpoint() *GroupHandler {
+	h.r.Post("/", h.Create)
+	return h
+}
+
+// Enable the read operation.
+func (h *GroupHandler) EnableReadEndpoint() *GroupHandler {
+	h.r.Get("/{id:\\d+}", h.Read)
+	return h
+}
+
+// Enable the list operation.
+func (h *GroupHandler) EnableListEndpoint() *GroupHandler {
+	h.r.Get("/", h.List)
+	return h
+}
+
 // The JobHandler.
 type JobHandler struct {
 	r *chi.Mux
@@ -58,56 +108,6 @@ func (h *JobHandler) EnableReadEndpoint() *JobHandler {
 
 // Enable the list operation.
 func (h *JobHandler) EnableListEndpoint() *JobHandler {
-	h.r.Get("/", h.List)
-	return h
-}
-
-// The SessionHandler.
-type SessionHandler struct {
-	r *chi.Mux
-
-	client    *ent.Client
-	validator *validator.Validate
-	logger    *logrus.Logger
-}
-
-// Create a new SessionHandler
-func NewSessionHandler(c *ent.Client, v *validator.Validate, log *logrus.Logger) *SessionHandler {
-	return &SessionHandler{
-		r:         chi.NewRouter(),
-		client:    c,
-		validator: v,
-		logger:    log,
-	}
-}
-
-// Implement the net/http Handler interface.
-func (h SessionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	h.r.ServeHTTP(w, r)
-}
-
-// Enable all endpoints.
-func (h *SessionHandler) EnableAllEndpoints() *SessionHandler {
-	h.EnableCreateEndpoint()
-	h.EnableReadEndpoint()
-	h.EnableListEndpoint()
-	return h
-}
-
-// Enable the create operation.
-func (h *SessionHandler) EnableCreateEndpoint() *SessionHandler {
-	h.r.Post("/", h.Create)
-	return h
-}
-
-// Enable the read operation.
-func (h *SessionHandler) EnableReadEndpoint() *SessionHandler {
-	h.r.Get("/{id:\\d+}", h.Read)
-	return h
-}
-
-// Enable the list operation.
-func (h *SessionHandler) EnableListEndpoint() *SessionHandler {
 	h.r.Get("/", h.List)
 	return h
 }
