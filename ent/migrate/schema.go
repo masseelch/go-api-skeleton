@@ -12,7 +12,7 @@ var (
 	JobsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "date", Type: field.TypeTime, Nullable: true},
-		{Name: "task", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "task", Type: field.TypeString, Size: 2147483647},
 		{Name: "state", Type: field.TypeString, Default: "open"},
 		{Name: "report", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "rest", Type: field.TypeString, Nullable: true, Size: 2147483647},

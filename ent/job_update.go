@@ -54,20 +54,6 @@ func (ju *JobUpdate) SetTask(s string) *JobUpdate {
 	return ju
 }
 
-// SetNillableTask sets the task field if the given value is not nil.
-func (ju *JobUpdate) SetNillableTask(s *string) *JobUpdate {
-	if s != nil {
-		ju.SetTask(*s)
-	}
-	return ju
-}
-
-// ClearTask clears the value of task.
-func (ju *JobUpdate) ClearTask() *JobUpdate {
-	ju.mutation.ClearTask()
-	return ju
-}
-
 // SetState sets the state field.
 func (ju *JobUpdate) SetState(s string) *JobUpdate {
 	ju.mutation.SetState(s)
@@ -320,12 +306,6 @@ func (ju *JobUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: job.FieldTask,
 		})
 	}
-	if ju.mutation.TaskCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: job.FieldTask,
-		})
-	}
 	if value, ok := ju.mutation.State(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -494,20 +474,6 @@ func (juo *JobUpdateOne) ClearDate() *JobUpdateOne {
 // SetTask sets the task field.
 func (juo *JobUpdateOne) SetTask(s string) *JobUpdateOne {
 	juo.mutation.SetTask(s)
-	return juo
-}
-
-// SetNillableTask sets the task field if the given value is not nil.
-func (juo *JobUpdateOne) SetNillableTask(s *string) *JobUpdateOne {
-	if s != nil {
-		juo.SetTask(*s)
-	}
-	return juo
-}
-
-// ClearTask clears the value of task.
-func (juo *JobUpdateOne) ClearTask() *JobUpdateOne {
-	juo.mutation.ClearTask()
 	return juo
 }
 
@@ -758,12 +724,6 @@ func (juo *JobUpdateOne) sqlSave(ctx context.Context) (_node *Job, err error) {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: job.FieldTask,
-		})
-	}
-	if juo.mutation.TaskCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
 			Column: job.FieldTask,
 		})
 	}

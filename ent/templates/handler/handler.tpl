@@ -42,8 +42,15 @@
 
         // Enable all endpoints.
         func (h *{{ $n.Name }}Handler) EnableAllEndpoints() *{{ $n.Name }}Handler {
+            h.EnableCreateEndpoint()
             h.EnableReadEndpoint()
             h.EnableListEndpoint()
+            return h
+        }
+
+        // Enable the create operation.
+        func (h *{{ $n.Name }}Handler) EnableCreateEndpoint() *{{ $n.Name }}Handler {
+            h.r.Post("/", h.Create)
             return h
         }
 

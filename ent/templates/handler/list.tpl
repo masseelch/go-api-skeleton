@@ -72,7 +72,7 @@
             es, err := q.All(r.Context())
             if err != nil {
                 h.logger.WithError(err).Error("error querying database") // todo - better error
-                render.InternalServerError(w, r)
+                render.InternalServerError(w, r, nil)
                 return
             }
 
@@ -81,12 +81,12 @@
                 {{- if $groups }}
                     {{- range $g := $groups}}"{{$g}}",{{ end -}}
                 {{ else -}}
-                    "{{ $n.Name | snake }}:list"
+                    "{{ $n.Name | snake }}:read"
                 {{- end -}}
             }}, es)
             if err != nil {
                 h.logger.WithError(err).Error("serialization error")
-                render.InternalServerError(w, r)
+                render.InternalServerError(w, r, nil)
                 return
             }
 

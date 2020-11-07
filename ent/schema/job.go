@@ -28,10 +28,9 @@ func (Job) Fields() []ent.Field {
 			Optional().
 			StructTag(`groups:"job:list"`),
 		field.Text("task").
-			Optional().
 			StructTag(`groups:"job:list"`),
 		field.String("state").
-			Default(JobStateOpen),
+			Default(JobStateOpen).Annotations(FieldAnnotation{Create: false}),
 		field.Text("report").
 			Optional().
 			StructTag(`groups:"job:list"`),

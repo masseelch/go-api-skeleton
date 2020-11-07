@@ -43,11 +43,11 @@ func (h JobHandler) Read(w http.ResponseWriter, r *http.Request) {
 			return
 		case *ent.NotSingularError:
 			h.logger.WithError(err).WithField("Job.id", id).Error("duplicate entry for id")
-			render.InternalServerError(w, r)
+			render.InternalServerError(w, r, nil)
 			return
 		default:
 			h.logger.WithError(err).WithField("Job.id", id).Error("error fetching node from db")
-			render.InternalServerError(w, r)
+			render.InternalServerError(w, r, nil)
 			return
 		}
 	}
@@ -55,7 +55,7 @@ func (h JobHandler) Read(w http.ResponseWriter, r *http.Request) {
 	d, err := sheriff.Marshal(&sheriff.Options{Groups: []string{"job:list", "user:list"}}, e)
 	if err != nil {
 		h.logger.WithError(err).WithField("Job.id", id).Error("serialization error")
-		render.InternalServerError(w, r)
+		render.InternalServerError(w, r, nil)
 		return
 	}
 
@@ -83,11 +83,11 @@ func (h SessionHandler) Read(w http.ResponseWriter, r *http.Request) {
 			return
 		case *ent.NotSingularError:
 			h.logger.WithError(err).WithField("Session.id", id).Error("duplicate entry for id")
-			render.InternalServerError(w, r)
+			render.InternalServerError(w, r, nil)
 			return
 		default:
 			h.logger.WithError(err).WithField("Session.id", id).Error("error fetching node from db")
-			render.InternalServerError(w, r)
+			render.InternalServerError(w, r, nil)
 			return
 		}
 	}
@@ -95,7 +95,7 @@ func (h SessionHandler) Read(w http.ResponseWriter, r *http.Request) {
 	d, err := sheriff.Marshal(&sheriff.Options{Groups: []string{"session:list"}}, e)
 	if err != nil {
 		h.logger.WithError(err).WithField("Session.id", id).Error("serialization error")
-		render.InternalServerError(w, r)
+		render.InternalServerError(w, r, nil)
 		return
 	}
 
@@ -128,11 +128,11 @@ func (h UserHandler) Read(w http.ResponseWriter, r *http.Request) {
 			return
 		case *ent.NotSingularError:
 			h.logger.WithError(err).WithField("User.id", id).Error("duplicate entry for id")
-			render.InternalServerError(w, r)
+			render.InternalServerError(w, r, nil)
 			return
 		default:
 			h.logger.WithError(err).WithField("User.id", id).Error("error fetching node from db")
-			render.InternalServerError(w, r)
+			render.InternalServerError(w, r, nil)
 			return
 		}
 	}
@@ -140,7 +140,7 @@ func (h UserHandler) Read(w http.ResponseWriter, r *http.Request) {
 	d, err := sheriff.Marshal(&sheriff.Options{Groups: []string{"user:list"}}, e)
 	if err != nil {
 		h.logger.WithError(err).WithField("User.id", id).Error("serialization error")
-		render.InternalServerError(w, r)
+		render.InternalServerError(w, r, nil)
 		return
 	}
 

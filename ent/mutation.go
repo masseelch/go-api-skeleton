@@ -223,22 +223,9 @@ func (m *JobMutation) OldTask(ctx context.Context) (v string, err error) {
 	return oldValue.Task, nil
 }
 
-// ClearTask clears the value of task.
-func (m *JobMutation) ClearTask() {
-	m.task = nil
-	m.clearedFields[job.FieldTask] = struct{}{}
-}
-
-// TaskCleared returns if the field task was cleared in this mutation.
-func (m *JobMutation) TaskCleared() bool {
-	_, ok := m.clearedFields[job.FieldTask]
-	return ok
-}
-
 // ResetTask reset all changes of the "task" field.
 func (m *JobMutation) ResetTask() {
 	m.task = nil
-	delete(m.clearedFields, job.FieldTask)
 }
 
 // SetState sets the state field.
@@ -805,9 +792,6 @@ func (m *JobMutation) ClearedFields() []string {
 	if m.FieldCleared(job.FieldDate) {
 		fields = append(fields, job.FieldDate)
 	}
-	if m.FieldCleared(job.FieldTask) {
-		fields = append(fields, job.FieldTask)
-	}
 	if m.FieldCleared(job.FieldReport) {
 		fields = append(fields, job.FieldReport)
 	}
@@ -836,9 +820,6 @@ func (m *JobMutation) ClearField(name string) error {
 	switch name {
 	case job.FieldDate:
 		m.ClearDate()
-		return nil
-	case job.FieldTask:
-		m.ClearTask()
 		return nil
 	case job.FieldReport:
 		m.ClearReport()

@@ -38,8 +38,15 @@ func (h JobHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 // Enable all endpoints.
 func (h *JobHandler) EnableAllEndpoints() *JobHandler {
+	h.EnableCreateEndpoint()
 	h.EnableReadEndpoint()
 	h.EnableListEndpoint()
+	return h
+}
+
+// Enable the create operation.
+func (h *JobHandler) EnableCreateEndpoint() *JobHandler {
+	h.r.Post("/", h.Create)
 	return h
 }
 
@@ -81,8 +88,15 @@ func (h SessionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 // Enable all endpoints.
 func (h *SessionHandler) EnableAllEndpoints() *SessionHandler {
+	h.EnableCreateEndpoint()
 	h.EnableReadEndpoint()
 	h.EnableListEndpoint()
+	return h
+}
+
+// Enable the create operation.
+func (h *SessionHandler) EnableCreateEndpoint() *SessionHandler {
+	h.r.Post("/", h.Create)
 	return h
 }
 
@@ -124,8 +138,15 @@ func (h UserHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 // Enable all endpoints.
 func (h *UserHandler) EnableAllEndpoints() *UserHandler {
+	h.EnableCreateEndpoint()
 	h.EnableReadEndpoint()
 	h.EnableListEndpoint()
+	return h
+}
+
+// Enable the create operation.
+func (h *UserHandler) EnableCreateEndpoint() *UserHandler {
+	h.r.Post("/", h.Create)
 	return h
 }
 

@@ -43,16 +43,19 @@ var serveCmd = &cobra.Command{
 		l := logrus.New()
 
 		r := chi.NewRouter()
-		r.Use(middleware.Logger)// todo - replace with logrus
+		r.Use(
+			middleware.DefaultLogger, // todo - replace with logrus
+		)
 
 		r.Route("/auth", func(r chi.Router) {
-			r.Post("/token", auth.LoginHandler(c, v ,l))
+			r.Post("/token", auth.LoginHandler(c, v, l))
 		})
 
 		r.Group(func(r chi.Router) {
 			r.Use(auth.Middleware(c, l))
 
 			r.Mount("/jobs", handler.NewJobHandler(c, v, l).EnableAllEndpoints())
+			r.Mount("/users", handler.NewUserHandler(c, v, l).EnableAllEndpoints())
 		})
 
 		log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", p), r))

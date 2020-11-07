@@ -41,14 +41,6 @@ func (jc *JobCreate) SetTask(s string) *JobCreate {
 	return jc
 }
 
-// SetNillableTask sets the task field if the given value is not nil.
-func (jc *JobCreate) SetNillableTask(s *string) *JobCreate {
-	if s != nil {
-		jc.SetTask(*s)
-	}
-	return jc
-}
-
 // SetState sets the state field.
 func (jc *JobCreate) SetState(s string) *JobCreate {
 	jc.mutation.SetState(s)
@@ -236,6 +228,9 @@ func (jc *JobCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (jc *JobCreate) check() error {
+	if _, ok := jc.mutation.Task(); !ok {
+		return &ValidationError{Name: "task", err: errors.New("ent: missing required field \"task\"")}
+	}
 	if _, ok := jc.mutation.State(); !ok {
 		return &ValidationError{Name: "state", err: errors.New("ent: missing required field \"state\"")}
 	}

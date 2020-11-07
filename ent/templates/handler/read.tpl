@@ -65,11 +65,11 @@
                         return
                     case *ent.NotSingularError:
                         h.logger.WithError(err).WithField("{{ $n.Name }}.{{ $n.ID.Name }}", id).Error("duplicate entry for id")
-                        render.InternalServerError(w, r)
+                        render.InternalServerError(w, r, nil)
                         return
                     default:
                         h.logger.WithError(err).WithField("{{ $n.Name }}.{{ $n.ID.Name }}", id).Error("error fetching node from db")
-                        render.InternalServerError(w, r)
+                        render.InternalServerError(w, r, nil)
                         return
                 }
             }
@@ -84,11 +84,11 @@
             }}, e)
             if err != nil {
                 h.logger.WithError(err).WithField("{{ $n.Name }}.{{ $n.ID.Name }}", id).Error("serialization error")
-                render.InternalServerError(w, r)
+                render.InternalServerError(w, r, nil)
                 return
             }
 
-            h.logger.WithField("{{ $n.Name | snake }}", e.ID).Info("job rendered")
+            h.logger.WithField("{{ $n.Name | snake }}", e.ID).Info("{{ $n.Name | snake }} rendered")
             render.OK(w, r, d)
         }
 

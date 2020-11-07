@@ -343,20 +343,6 @@ func TaskHasSuffix(v string) predicate.Job {
 	})
 }
 
-// TaskIsNil applies the IsNil predicate on the "task" field.
-func TaskIsNil() predicate.Job {
-	return predicate.Job(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldTask)))
-	})
-}
-
-// TaskNotNil applies the NotNil predicate on the "task" field.
-func TaskNotNil() predicate.Job {
-	return predicate.Job(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldTask)))
-	})
-}
-
 // TaskEqualFold applies the EqualFold predicate on the "task" field.
 func TaskEqualFold(v string) predicate.Job {
 	return predicate.Job(func(s *sql.Selector) {

@@ -85,14 +85,14 @@ func (h JobHandler) List(w http.ResponseWriter, r *http.Request) {
 	es, err := q.All(r.Context())
 	if err != nil {
 		h.logger.WithError(err).Error("error querying database") // todo - better error
-		render.InternalServerError(w, r)
+		render.InternalServerError(w, r, nil)
 		return
 	}
 
 	d, err := sheriff.Marshal(&sheriff.Options{Groups: []string{"job:list", "user:list"}}, es)
 	if err != nil {
 		h.logger.WithError(err).Error("serialization error")
-		render.InternalServerError(w, r)
+		render.InternalServerError(w, r, nil)
 		return
 	}
 
@@ -123,14 +123,14 @@ func (h SessionHandler) List(w http.ResponseWriter, r *http.Request) {
 	es, err := q.All(r.Context())
 	if err != nil {
 		h.logger.WithError(err).Error("error querying database") // todo - better error
-		render.InternalServerError(w, r)
+		render.InternalServerError(w, r, nil)
 		return
 	}
 
-	d, err := sheriff.Marshal(&sheriff.Options{Groups: []string{"session:list"}}, es)
+	d, err := sheriff.Marshal(&sheriff.Options{Groups: []string{"session:read"}}, es)
 	if err != nil {
 		h.logger.WithError(err).Error("serialization error")
-		render.InternalServerError(w, r)
+		render.InternalServerError(w, r, nil)
 		return
 	}
 
@@ -175,14 +175,14 @@ func (h UserHandler) List(w http.ResponseWriter, r *http.Request) {
 	es, err := q.All(r.Context())
 	if err != nil {
 		h.logger.WithError(err).Error("error querying database") // todo - better error
-		render.InternalServerError(w, r)
+		render.InternalServerError(w, r, nil)
 		return
 	}
 
-	d, err := sheriff.Marshal(&sheriff.Options{Groups: []string{"user:list"}}, es)
+	d, err := sheriff.Marshal(&sheriff.Options{Groups: []string{"user:read"}}, es)
 	if err != nil {
 		h.logger.WithError(err).Error("serialization error")
-		render.InternalServerError(w, r)
+		render.InternalServerError(w, r, nil)
 		return
 	}
 
