@@ -51,12 +51,16 @@
                     }
                 {{- end}}
 
+                {{/* If one of the given handler groups is set on the edge eager join it.*/}}
+                // todo - nested eager loading?
                 e, err := h.client.{{ $n.Name }}.Query().Where({{ $n.Name | snake }}.ID(id)).
                 {{- range $e := $n.Edges }}
-                    {{- range $l := $n.Annotations.HandlerGen.ReadEager}}
-                        {{- if eq $l $e.Name }}With{{ pascal $e.Name }}().{{ end -}}
-                    {{ end -}}
-                {{ end -}}
+                    {{- range $g := $n.Annotations.HandlerGen.ReadGroups }}
+                        {{- range $eg := split (tagLookup $e.StructTag "groups") "," }}
+                            {{- if eq $g $eg }}With{{ pascal $e.Name }}().{{ end -}}
+                        {{- end }}
+                    {{- end }}
+                {{- end -}}
                 Only(r.Context())
                 if err != nil {
                     switch err.(type) {

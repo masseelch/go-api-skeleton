@@ -32,6 +32,7 @@ func (h GroupHandler) Read(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// todo - nested eager loading?
 	e, err := h.client.Group.Query().Where(group.ID(id)).Only(r.Context())
 	if err != nil {
 		switch err.(type) {
@@ -77,6 +78,7 @@ func (h JobHandler) Read(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// todo - nested eager loading?
 	e, err := h.client.Job.Query().Where(job.ID(id)).WithUsers().Only(r.Context())
 	if err != nil {
 		switch err.(type) {
@@ -95,7 +97,7 @@ func (h JobHandler) Read(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	d, err := sheriff.Marshal(&sheriff.Options{Groups: []string{"job:list", "user:list"}}, e)
+	d, err := sheriff.Marshal(&sheriff.Options{Groups: []string{"job:read", "user:list"}}, e)
 	if err != nil {
 		h.logger.WithError(err).WithField("Job.id", id).Error("serialization error")
 		render.InternalServerError(w, r, nil)
@@ -122,6 +124,7 @@ func (h UserHandler) Read(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// todo - nested eager loading?
 	e, err := h.client.User.Query().Where(user.ID(id)).Only(r.Context())
 	if err != nil {
 		switch err.(type) {

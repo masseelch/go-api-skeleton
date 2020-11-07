@@ -69,11 +69,11 @@ func (Job) Annotations() []schema.Annotation {
 			StructTag: `json:"edges" groups:"job:list,job:read"`,
 		},
 		HandlerAnnotation{
-			ReadGroups: []string{"job:list", "user:list"},
+			ReadGroups: []string{"job:read", "user:list"},
 			CreateGroups: []string{"job:read", "user:list"},
 
-			ReadEager: []string{"users"},
-			ListEager: []string{"users"},
+			// ReadEager: []string{"users"},
+			// ListEager: []string{"users"},
 		},
 	}
 }

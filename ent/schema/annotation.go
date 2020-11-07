@@ -8,9 +8,6 @@ type (
 		ListGroups     []string
 		ReadGroups     []string
 		UpdateGroups   []string
-
-		ReadEager []string
-		ListEager []string
 	}
 	// Used on fields pass options to the handler generator.
 	FieldAnnotation struct {

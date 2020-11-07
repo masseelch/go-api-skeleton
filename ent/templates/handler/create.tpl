@@ -29,16 +29,19 @@
     )
 
     {{ range $n := $.Nodes }}
+        {{/* Skipt generation for models that are marked as such. */}}
         {{ if not $n.Annotations.HandlerGen.SkipGeneration }}
 
             // struct to bind the post body to.
             type {{ $n.Name | camel }}CreateRequest struct {
+                {{/* Add all fields that are not excluded. */}}
                 {{ range $f := $n.Fields -}}
                     {{- $a := $f.Annotations.FieldGen }}
                     {{- if or (not $a) $a.Create }}
                         {{ $f.StructField }} {{ $f.Type.String }} `{{ $f.StructTag }}`
                     {{- end }}
-                {{- end }}
+                {{- end -}}
+                {{/* Add all edges that are not excluded. */}}
                 {{- range $e := $n.Edges -}}
                     {{- $a := $e.Annotations.FieldGen }}
                     {{- if and (not $e.Type.Annotations.HandlerGen.SkipGeneration) (or (not $a) $a.Create) }}

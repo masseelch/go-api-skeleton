@@ -51,7 +51,7 @@ func (h GroupHandler) List(w http.ResponseWriter, r *http.Request) {
 
 // This function queries for Job models. Can be filtered by query parameters.
 func (h JobHandler) List(w http.ResponseWriter, r *http.Request) {
-	q := h.client.Job.Query().WithUsers()
+	q := h.client.Job.Query()
 
 	// Pagination. Default is 30 items per page.
 	page, itemsPerPage, err := pagination(w, r, h.logger)
@@ -124,7 +124,7 @@ func (h JobHandler) List(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	d, err := sheriff.Marshal(&sheriff.Options{Groups: []string{"job:list", "user:list"}}, es)
+	d, err := sheriff.Marshal(&sheriff.Options{Groups: []string{"job:read", "user:list"}}, es)
 	if err != nil {
 		h.logger.WithError(err).Error("serialization error")
 		render.InternalServerError(w, r, nil)
