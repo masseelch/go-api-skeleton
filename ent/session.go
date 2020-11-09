@@ -4,6 +4,7 @@ package ent
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/facebook/ent/dialect/sql"
@@ -123,8 +124,18 @@ func (s *Session) Unwrap() *Session {
 	return s
 }
 
-// Get rid of the fmt.Stringer implementation since it breaks liip/sheriff.
-// This lines have to be here since template/text does skip empty templates.
+// String implements the fmt.Stringer.
+func (s *Session) String() string {
+	var builder strings.Builder
+	builder.WriteString("Session(")
+	builder.WriteString(fmt.Sprintf("id=%v", s.ID))
+	builder.WriteString(", idleTimeExpiredAt=")
+	builder.WriteString(s.IdleTimeExpiredAt.Format(time.ANSIC))
+	builder.WriteString(", lifeTimeExpiredAt=")
+	builder.WriteString(s.LifeTimeExpiredAt.Format(time.ANSIC))
+	builder.WriteByte(')')
+	return builder.String()
+}
 
 // Sessions is a parsable slice of Session.
 type Sessions []*Session

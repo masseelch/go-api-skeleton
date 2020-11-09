@@ -4,6 +4,7 @@ package ent
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/masseelch/go-api-skeleton/ent/account"
@@ -90,8 +91,16 @@ func (a *Account) Unwrap() *Account {
 	return a
 }
 
-// Get rid of the fmt.Stringer implementation since it breaks liip/sheriff.
-// This lines have to be here since template/text does skip empty templates.
+// String implements the fmt.Stringer.
+func (a *Account) String() string {
+	var builder strings.Builder
+	builder.WriteString("Account(")
+	builder.WriteString(fmt.Sprintf("id=%v", a.ID))
+	builder.WriteString(", title=")
+	builder.WriteString(a.Title)
+	builder.WriteByte(')')
+	return builder.String()
+}
 
 // Accounts is a parsable slice of Account.
 type Accounts []*Account

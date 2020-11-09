@@ -4,6 +4,7 @@ package ent
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/facebook/ent/dialect/sql"
@@ -122,8 +123,18 @@ func (t *Transaction) Unwrap() *Transaction {
 	return t
 }
 
-// Get rid of the fmt.Stringer implementation since it breaks liip/sheriff.
-// This lines have to be here since template/text does skip empty templates.
+// String implements the fmt.Stringer.
+func (t *Transaction) String() string {
+	var builder strings.Builder
+	builder.WriteString("Transaction(")
+	builder.WriteString(fmt.Sprintf("id=%v", t.ID))
+	builder.WriteString(", date=")
+	builder.WriteString(t.Date.Format(time.ANSIC))
+	builder.WriteString(", amount=")
+	builder.WriteString(fmt.Sprintf("%v", t.Amount))
+	builder.WriteByte(')')
+	return builder.String()
+}
 
 // Transactions is a parsable slice of Transaction.
 type Transactions []*Transaction

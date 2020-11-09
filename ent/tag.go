@@ -4,6 +4,7 @@ package ent
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/masseelch/go-api-skeleton/ent/tag"
@@ -72,8 +73,18 @@ func (t *Tag) Unwrap() *Tag {
 	return t
 }
 
-// Get rid of the fmt.Stringer implementation since it breaks liip/sheriff.
-// This lines have to be here since template/text does skip empty templates.
+// String implements the fmt.Stringer.
+func (t *Tag) String() string {
+	var builder strings.Builder
+	builder.WriteString("Tag(")
+	builder.WriteString(fmt.Sprintf("id=%v", t.ID))
+	builder.WriteString(", title=")
+	builder.WriteString(t.Title)
+	builder.WriteString(", description=")
+	builder.WriteString(t.Description)
+	builder.WriteByte(')')
+	return builder.String()
+}
 
 // Tags is a parsable slice of Tag.
 type Tags []*Tag
