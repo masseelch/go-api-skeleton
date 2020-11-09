@@ -67,7 +67,7 @@ func LoginHandler(c *ent.Client, v *validator.Validate, log *logrus.Logger) http
 		}
 
 		// Create a new session.
-		t, err := go_token.GenerateToken(64)
+		t, err := token.GenerateToken(64)
 		if err != nil {
 			log.WithError(err).Error(logTokenGenerationError)
 			render.InternalServerError(w, r, nil)

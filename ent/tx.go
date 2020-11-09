@@ -12,12 +12,14 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
-	// Group is the client for interacting with the Group builders.
-	Group *GroupClient
-	// Job is the client for interacting with the Job builders.
-	Job *JobClient
+	// Account is the client for interacting with the Account builders.
+	Account *AccountClient
 	// Session is the client for interacting with the Session builders.
 	Session *SessionClient
+	// Tag is the client for interacting with the Tag builders.
+	Tag *TagClient
+	// Transaction is the client for interacting with the Transaction builders.
+	Transaction *TransactionClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 
@@ -155,9 +157,10 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
-	tx.Group = NewGroupClient(tx.config)
-	tx.Job = NewJobClient(tx.config)
+	tx.Account = NewAccountClient(tx.config)
 	tx.Session = NewSessionClient(tx.config)
+	tx.Tag = NewTagClient(tx.config)
+	tx.Transaction = NewTransactionClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 }
 
@@ -168,7 +171,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: Group.QueryXXX(), the query will be executed
+// applies a query, for example: Account.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

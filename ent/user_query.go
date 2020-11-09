@@ -12,10 +12,10 @@ import (
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/dialect/sql/sqlgraph"
 	"github.com/facebook/ent/schema/field"
-	"github.com/masseelch/go-api-skeleton/ent/group"
-	"github.com/masseelch/go-api-skeleton/ent/job"
+	"github.com/masseelch/go-api-skeleton/ent/account"
 	"github.com/masseelch/go-api-skeleton/ent/predicate"
 	"github.com/masseelch/go-api-skeleton/ent/session"
+	"github.com/masseelch/go-api-skeleton/ent/transaction"
 	"github.com/masseelch/go-api-skeleton/ent/user"
 )
 
@@ -28,10 +28,9 @@ type UserQuery struct {
 	unique     []string
 	predicates []predicate.User
 	// eager-loading edges.
-	withSessions *SessionQuery
-	withJobs     *JobQuery
-	withGroup    *GroupQuery
-	withFKs      bool
+	withSessions     *SessionQuery
+	withAccounts     *AccountQuery
+	withTransactions *TransactionQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -83,9 +82,9 @@ func (uq *UserQuery) QuerySessions() *SessionQuery {
 	return query
 }
 
-// QueryJobs chains the current query on the jobs edge.
-func (uq *UserQuery) QueryJobs() *JobQuery {
-	query := &JobQuery{config: uq.config}
+// QueryAccounts chains the current query on the accounts edge.
+func (uq *UserQuery) QueryAccounts() *AccountQuery {
+	query := &AccountQuery{config: uq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -96,8 +95,8 @@ func (uq *UserQuery) QueryJobs() *JobQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, selector),
-			sqlgraph.To(job.Table, job.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, user.JobsTable, user.JobsPrimaryKey...),
+			sqlgraph.To(account.Table, account.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, user.AccountsTable, user.AccountsPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -105,9 +104,9 @@ func (uq *UserQuery) QueryJobs() *JobQuery {
 	return query
 }
 
-// QueryGroup chains the current query on the group edge.
-func (uq *UserQuery) QueryGroup() *GroupQuery {
-	query := &GroupQuery{config: uq.config}
+// QueryTransactions chains the current query on the transactions edge.
+func (uq *UserQuery) QueryTransactions() *TransactionQuery {
+	query := &TransactionQuery{config: uq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -118,8 +117,8 @@ func (uq *UserQuery) QueryGroup() *GroupQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, selector),
-			sqlgraph.To(group.Table, group.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, user.GroupTable, user.GroupColumn),
+			sqlgraph.To(transaction.Table, transaction.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.TransactionsTable, user.TransactionsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -297,15 +296,15 @@ func (uq *UserQuery) Clone() *UserQuery {
 		return nil
 	}
 	return &UserQuery{
-		config:       uq.config,
-		limit:        uq.limit,
-		offset:       uq.offset,
-		order:        append([]OrderFunc{}, uq.order...),
-		unique:       append([]string{}, uq.unique...),
-		predicates:   append([]predicate.User{}, uq.predicates...),
-		withSessions: uq.withSessions.Clone(),
-		withJobs:     uq.withJobs.Clone(),
-		withGroup:    uq.withGroup.Clone(),
+		config:           uq.config,
+		limit:            uq.limit,
+		offset:           uq.offset,
+		order:            append([]OrderFunc{}, uq.order...),
+		unique:           append([]string{}, uq.unique...),
+		predicates:       append([]predicate.User{}, uq.predicates...),
+		withSessions:     uq.withSessions.Clone(),
+		withAccounts:     uq.withAccounts.Clone(),
+		withTransactions: uq.withTransactions.Clone(),
 		// clone intermediate query.
 		sql:  uq.sql.Clone(),
 		path: uq.path,
@@ -323,25 +322,25 @@ func (uq *UserQuery) WithSessions(opts ...func(*SessionQuery)) *UserQuery {
 	return uq
 }
 
-//  WithJobs tells the query-builder to eager-loads the nodes that are connected to
-// the "jobs" edge. The optional arguments used to configure the query builder of the edge.
-func (uq *UserQuery) WithJobs(opts ...func(*JobQuery)) *UserQuery {
-	query := &JobQuery{config: uq.config}
+//  WithAccounts tells the query-builder to eager-loads the nodes that are connected to
+// the "accounts" edge. The optional arguments used to configure the query builder of the edge.
+func (uq *UserQuery) WithAccounts(opts ...func(*AccountQuery)) *UserQuery {
+	query := &AccountQuery{config: uq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	uq.withJobs = query
+	uq.withAccounts = query
 	return uq
 }
 
-//  WithGroup tells the query-builder to eager-loads the nodes that are connected to
-// the "group" edge. The optional arguments used to configure the query builder of the edge.
-func (uq *UserQuery) WithGroup(opts ...func(*GroupQuery)) *UserQuery {
-	query := &GroupQuery{config: uq.config}
+//  WithTransactions tells the query-builder to eager-loads the nodes that are connected to
+// the "transactions" edge. The optional arguments used to configure the query builder of the edge.
+func (uq *UserQuery) WithTransactions(opts ...func(*TransactionQuery)) *UserQuery {
+	query := &TransactionQuery{config: uq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	uq.withGroup = query
+	uq.withTransactions = query
 	return uq
 }
 
@@ -410,27 +409,17 @@ func (uq *UserQuery) prepareQuery(ctx context.Context) error {
 func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	var (
 		nodes       = []*User{}
-		withFKs     = uq.withFKs
 		_spec       = uq.querySpec()
 		loadedTypes = [3]bool{
 			uq.withSessions != nil,
-			uq.withJobs != nil,
-			uq.withGroup != nil,
+			uq.withAccounts != nil,
+			uq.withTransactions != nil,
 		}
 	)
-	if uq.withGroup != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, user.ForeignKeys...)
-	}
 	_spec.ScanValues = func() []interface{} {
 		node := &User{config: uq.config}
 		nodes = append(nodes, node)
 		values := node.scanValues()
-		if withFKs {
-			values = append(values, node.fkValues()...)
-		}
 		return values
 	}
 	_spec.Assign = func(values ...interface{}) error {
@@ -477,13 +466,13 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 		}
 	}
 
-	if query := uq.withJobs; query != nil {
+	if query := uq.withAccounts; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
 		ids := make(map[int]*User, len(nodes))
 		for _, node := range nodes {
 			ids[node.ID] = node
 			fks = append(fks, node.ID)
-			node.Edges.Jobs = []*Job{}
+			node.Edges.Accounts = []*Account{}
 		}
 		var (
 			edgeids []int
@@ -492,11 +481,11 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 		_spec := &sqlgraph.EdgeQuerySpec{
 			Edge: &sqlgraph.EdgeSpec{
 				Inverse: true,
-				Table:   user.JobsTable,
-				Columns: user.JobsPrimaryKey,
+				Table:   user.AccountsTable,
+				Columns: user.AccountsPrimaryKey,
 			},
 			Predicate: func(s *sql.Selector) {
-				s.Where(sql.InValues(user.JobsPrimaryKey[1], fks...))
+				s.Where(sql.InValues(user.AccountsPrimaryKey[1], fks...))
 			},
 
 			ScanValues: func() [2]interface{} {
@@ -523,9 +512,9 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 			},
 		}
 		if err := sqlgraph.QueryEdges(ctx, uq.driver, _spec); err != nil {
-			return nil, fmt.Errorf(`query edges "jobs": %v`, err)
+			return nil, fmt.Errorf(`query edges "accounts": %v`, err)
 		}
-		query.Where(job.IDIn(edgeids...))
+		query.Where(account.IDIn(edgeids...))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
@@ -533,36 +522,40 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 		for _, n := range neighbors {
 			nodes, ok := edges[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected "jobs" node returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected "accounts" node returned %v`, n.ID)
 			}
 			for i := range nodes {
-				nodes[i].Edges.Jobs = append(nodes[i].Edges.Jobs, n)
+				nodes[i].Edges.Accounts = append(nodes[i].Edges.Accounts, n)
 			}
 		}
 	}
 
-	if query := uq.withGroup; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*User)
+	if query := uq.withTransactions; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[int]*User)
 		for i := range nodes {
-			if fk := nodes[i].group_users; fk != nil {
-				ids = append(ids, *fk)
-				nodeids[*fk] = append(nodeids[*fk], nodes[i])
-			}
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Transactions = []*Transaction{}
 		}
-		query.Where(group.IDIn(ids...))
+		query.withFKs = true
+		query.Where(predicate.Transaction(func(s *sql.Selector) {
+			s.Where(sql.InValues(user.TransactionsColumn, fks...))
+		}))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
+			fk := n.user_transactions
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "user_transactions" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "group_users" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "user_transactions" returned %v for node %v`, *fk, n.ID)
 			}
-			for i := range nodes {
-				nodes[i].Edges.Group = n
-			}
+			node.Edges.Transactions = append(node.Edges.Transactions, n)
 		}
 	}
 

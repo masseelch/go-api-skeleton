@@ -12,8 +12,8 @@ import (
 	"github.com/masseelch/go-api-skeleton/ent"
 )
 
-// The GroupHandler.
-type GroupHandler struct {
+// The AccountHandler.
+type AccountHandler struct {
 	r *chi.Mux
 
 	client    *ent.Client
@@ -21,9 +21,9 @@ type GroupHandler struct {
 	logger    *logrus.Logger
 }
 
-// Create a new GroupHandler
-func NewGroupHandler(c *ent.Client, v *validator.Validate, log *logrus.Logger) *GroupHandler {
-	return &GroupHandler{
+// Create a new AccountHandler
+func NewAccountHandler(c *ent.Client, v *validator.Validate, log *logrus.Logger) *AccountHandler {
+	return &AccountHandler{
 		r:         chi.NewRouter(),
 		client:    c,
 		validator: v,
@@ -32,12 +32,12 @@ func NewGroupHandler(c *ent.Client, v *validator.Validate, log *logrus.Logger) *
 }
 
 // Implement the net/http Handler interface.
-func (h GroupHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h AccountHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h.r.ServeHTTP(w, r)
 }
 
 // Enable all endpoints.
-func (h *GroupHandler) EnableAllEndpoints() *GroupHandler {
+func (h *AccountHandler) EnableAllEndpoints() *AccountHandler {
 	h.EnableCreateEndpoint()
 	h.EnableReadEndpoint()
 	h.EnableListEndpoint()
@@ -45,25 +45,25 @@ func (h *GroupHandler) EnableAllEndpoints() *GroupHandler {
 }
 
 // Enable the create operation.
-func (h *GroupHandler) EnableCreateEndpoint() *GroupHandler {
+func (h *AccountHandler) EnableCreateEndpoint() *AccountHandler {
 	h.r.Post("/", h.Create)
 	return h
 }
 
 // Enable the read operation.
-func (h *GroupHandler) EnableReadEndpoint() *GroupHandler {
+func (h *AccountHandler) EnableReadEndpoint() *AccountHandler {
 	h.r.Get("/{id:\\d+}", h.Read)
 	return h
 }
 
 // Enable the list operation.
-func (h *GroupHandler) EnableListEndpoint() *GroupHandler {
+func (h *AccountHandler) EnableListEndpoint() *AccountHandler {
 	h.r.Get("/", h.List)
 	return h
 }
 
-// The JobHandler.
-type JobHandler struct {
+// The TagHandler.
+type TagHandler struct {
 	r *chi.Mux
 
 	client    *ent.Client
@@ -71,9 +71,9 @@ type JobHandler struct {
 	logger    *logrus.Logger
 }
 
-// Create a new JobHandler
-func NewJobHandler(c *ent.Client, v *validator.Validate, log *logrus.Logger) *JobHandler {
-	return &JobHandler{
+// Create a new TagHandler
+func NewTagHandler(c *ent.Client, v *validator.Validate, log *logrus.Logger) *TagHandler {
+	return &TagHandler{
 		r:         chi.NewRouter(),
 		client:    c,
 		validator: v,
@@ -82,12 +82,12 @@ func NewJobHandler(c *ent.Client, v *validator.Validate, log *logrus.Logger) *Jo
 }
 
 // Implement the net/http Handler interface.
-func (h JobHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h TagHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h.r.ServeHTTP(w, r)
 }
 
 // Enable all endpoints.
-func (h *JobHandler) EnableAllEndpoints() *JobHandler {
+func (h *TagHandler) EnableAllEndpoints() *TagHandler {
 	h.EnableCreateEndpoint()
 	h.EnableReadEndpoint()
 	h.EnableListEndpoint()
@@ -95,19 +95,69 @@ func (h *JobHandler) EnableAllEndpoints() *JobHandler {
 }
 
 // Enable the create operation.
-func (h *JobHandler) EnableCreateEndpoint() *JobHandler {
+func (h *TagHandler) EnableCreateEndpoint() *TagHandler {
 	h.r.Post("/", h.Create)
 	return h
 }
 
 // Enable the read operation.
-func (h *JobHandler) EnableReadEndpoint() *JobHandler {
+func (h *TagHandler) EnableReadEndpoint() *TagHandler {
 	h.r.Get("/{id:\\d+}", h.Read)
 	return h
 }
 
 // Enable the list operation.
-func (h *JobHandler) EnableListEndpoint() *JobHandler {
+func (h *TagHandler) EnableListEndpoint() *TagHandler {
+	h.r.Get("/", h.List)
+	return h
+}
+
+// The TransactionHandler.
+type TransactionHandler struct {
+	r *chi.Mux
+
+	client    *ent.Client
+	validator *validator.Validate
+	logger    *logrus.Logger
+}
+
+// Create a new TransactionHandler
+func NewTransactionHandler(c *ent.Client, v *validator.Validate, log *logrus.Logger) *TransactionHandler {
+	return &TransactionHandler{
+		r:         chi.NewRouter(),
+		client:    c,
+		validator: v,
+		logger:    log,
+	}
+}
+
+// Implement the net/http Handler interface.
+func (h TransactionHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	h.r.ServeHTTP(w, r)
+}
+
+// Enable all endpoints.
+func (h *TransactionHandler) EnableAllEndpoints() *TransactionHandler {
+	h.EnableCreateEndpoint()
+	h.EnableReadEndpoint()
+	h.EnableListEndpoint()
+	return h
+}
+
+// Enable the create operation.
+func (h *TransactionHandler) EnableCreateEndpoint() *TransactionHandler {
+	h.r.Post("/", h.Create)
+	return h
+}
+
+// Enable the read operation.
+func (h *TransactionHandler) EnableReadEndpoint() *TransactionHandler {
+	h.r.Get("/{id:\\d+}", h.Read)
+	return h
+}
+
+// Enable the list operation.
+func (h *TransactionHandler) EnableListEndpoint() *TransactionHandler {
 	h.r.Get("/", h.List)
 	return h
 }

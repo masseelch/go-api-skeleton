@@ -4,21 +4,19 @@ package ent
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/masseelch/go-api-skeleton/ent/session"
-
 	"github.com/masseelch/go-api-skeleton/ent/user"
-	go_token "github.com/masseelch/go-token"
+	"github.com/masseelch/go-token"
 )
 
 // Session is the model entity for the Session schema.
 type Session struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID go_token.Token `json:"token"`
+	ID token.Token `json:"token"`
 	// IdleTimeExpiredAt holds the value of the "idleTimeExpiredAt" field.
 	IdleTimeExpiredAt time.Time `json:"idleTimeExpiredAt,omitempty"`
 	// LifeTimeExpiredAt holds the value of the "lifeTimeExpiredAt" field.
@@ -77,7 +75,7 @@ func (s *Session) assignValues(values ...interface{}) error {
 	if value, ok := values[0].(*sql.NullString); !ok {
 		return fmt.Errorf("unexpected type %T for field id", values[0])
 	} else if value.Valid {
-		s.ID = go_token.Token(value.String)
+		s.ID = token.Token(value.String)
 	}
 	values = values[1:]
 	if value, ok := values[0].(*sql.NullTime); !ok {
@@ -125,18 +123,8 @@ func (s *Session) Unwrap() *Session {
 	return s
 }
 
-// String implements the fmt.Stringer.
-func (s *Session) String() string {
-	var builder strings.Builder
-	builder.WriteString("Session(")
-	builder.WriteString(fmt.Sprintf("id=%v", s.ID))
-	builder.WriteString(", idleTimeExpiredAt=")
-	builder.WriteString(s.IdleTimeExpiredAt.Format(time.ANSIC))
-	builder.WriteString(", lifeTimeExpiredAt=")
-	builder.WriteString(s.LifeTimeExpiredAt.Format(time.ANSIC))
-	builder.WriteByte(')')
-	return builder.String()
-}
+// Get rid of the fmt.Stringer implementation since it breaks liip/sheriff.
+// This lines have to be here since template/text does skip empty templates.
 
 // Sessions is a parsable slice of Session.
 type Sessions []*Session

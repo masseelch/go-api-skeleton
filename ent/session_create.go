@@ -12,7 +12,7 @@ import (
 	"github.com/facebook/ent/schema/field"
 	"github.com/masseelch/go-api-skeleton/ent/session"
 	"github.com/masseelch/go-api-skeleton/ent/user"
-	go_token "github.com/masseelch/go-token"
+	"github.com/masseelch/go-token"
 )
 
 // SessionCreate is the builder for creating a Session entity.
@@ -35,8 +35,8 @@ func (sc *SessionCreate) SetLifeTimeExpiredAt(t time.Time) *SessionCreate {
 }
 
 // SetID sets the id field.
-func (sc *SessionCreate) SetID(gt go_token.Token) *SessionCreate {
-	sc.mutation.SetID(gt)
+func (sc *SessionCreate) SetID(t token.Token) *SessionCreate {
+	sc.mutation.SetID(t)
 	return sc
 }
 

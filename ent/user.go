@@ -4,10 +4,8 @@ package ent
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/facebook/ent/dialect/sql"
-	"github.com/masseelch/go-api-skeleton/ent/group"
 	"github.com/masseelch/go-api-skeleton/ent/user"
 )
 
@@ -24,18 +22,17 @@ type User struct {
 	Enabled bool `json:"enabled,omitempty" groups:"user:list"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
-	Edges       UserEdges `json:"edges" groups:"user:read"`
-	group_users *int
+	Edges UserEdges `json:"edges" groups:"user:read"`
 }
 
 // UserEdges holds the relations/edges for other nodes in the graph.
 type UserEdges struct {
 	// Sessions holds the value of the sessions edge.
 	Sessions []*Session `json:"-"`
-	// Jobs holds the value of the jobs edge.
-	Jobs []*Job `json:"jobs,omitempty" groups:"user:read"`
-	// Group holds the value of the group edge.
-	Group *Group `json:"group,omitempty" groups:"user:read"`
+	// Accounts holds the value of the accounts edge.
+	Accounts []*Account `json:"accounts,omitempty" groups:"user:read"`
+	// Transactions holds the value of the transactions edge.
+	Transactions []*Transaction `json:"transactions,omitempty" groups:"user:read"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [3]bool
@@ -50,27 +47,22 @@ func (e UserEdges) SessionsOrErr() ([]*Session, error) {
 	return nil, &NotLoadedError{edge: "sessions"}
 }
 
-// JobsOrErr returns the Jobs value or an error if the edge
+// AccountsOrErr returns the Accounts value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) JobsOrErr() ([]*Job, error) {
+func (e UserEdges) AccountsOrErr() ([]*Account, error) {
 	if e.loadedTypes[1] {
-		return e.Jobs, nil
+		return e.Accounts, nil
 	}
-	return nil, &NotLoadedError{edge: "jobs"}
+	return nil, &NotLoadedError{edge: "accounts"}
 }
 
-// GroupOrErr returns the Group value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e UserEdges) GroupOrErr() (*Group, error) {
+// TransactionsOrErr returns the Transactions value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) TransactionsOrErr() ([]*Transaction, error) {
 	if e.loadedTypes[2] {
-		if e.Group == nil {
-			// The edge group was loaded in eager-loading,
-			// but was not found.
-			return nil, &NotFoundError{label: group.Label}
-		}
-		return e.Group, nil
+		return e.Transactions, nil
 	}
-	return nil, &NotLoadedError{edge: "group"}
+	return nil, &NotLoadedError{edge: "transactions"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -80,13 +72,6 @@ func (*User) scanValues() []interface{} {
 		&sql.NullString{}, // email
 		&sql.NullString{}, // password
 		&sql.NullBool{},   // enabled
-	}
-}
-
-// fkValues returns the types for scanning foreign-keys values from sql.Rows.
-func (*User) fkValues() []interface{} {
-	return []interface{}{
-		&sql.NullInt64{}, // group_users
 	}
 }
 
@@ -117,15 +102,6 @@ func (u *User) assignValues(values ...interface{}) error {
 	} else if value.Valid {
 		u.Enabled = value.Bool
 	}
-	values = values[3:]
-	if len(values) == len(user.ForeignKeys) {
-		if value, ok := values[0].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for edge-field group_users", value)
-		} else if value.Valid {
-			u.group_users = new(int)
-			*u.group_users = int(value.Int64)
-		}
-	}
 	return nil
 }
 
@@ -134,14 +110,14 @@ func (u *User) QuerySessions() *SessionQuery {
 	return (&UserClient{config: u.config}).QuerySessions(u)
 }
 
-// QueryJobs queries the jobs edge of the User.
-func (u *User) QueryJobs() *JobQuery {
-	return (&UserClient{config: u.config}).QueryJobs(u)
+// QueryAccounts queries the accounts edge of the User.
+func (u *User) QueryAccounts() *AccountQuery {
+	return (&UserClient{config: u.config}).QueryAccounts(u)
 }
 
-// QueryGroup queries the group edge of the User.
-func (u *User) QueryGroup() *GroupQuery {
-	return (&UserClient{config: u.config}).QueryGroup(u)
+// QueryTransactions queries the transactions edge of the User.
+func (u *User) QueryTransactions() *TransactionQuery {
+	return (&UserClient{config: u.config}).QueryTransactions(u)
 }
 
 // Update returns a builder for updating this User.
@@ -162,19 +138,8 @@ func (u *User) Unwrap() *User {
 	return u
 }
 
-// String implements the fmt.Stringer.
-func (u *User) String() string {
-	var builder strings.Builder
-	builder.WriteString("User(")
-	builder.WriteString(fmt.Sprintf("id=%v", u.ID))
-	builder.WriteString(", email=")
-	builder.WriteString(u.Email)
-	builder.WriteString(", password=<sensitive>")
-	builder.WriteString(", enabled=")
-	builder.WriteString(fmt.Sprintf("%v", u.Enabled))
-	builder.WriteByte(')')
-	return builder.String()
-}
+// Get rid of the fmt.Stringer implementation since it breaks liip/sheriff.
+// This lines have to be here since template/text does skip empty templates.
 
 // Users is a parsable slice of User.
 type Users []*User

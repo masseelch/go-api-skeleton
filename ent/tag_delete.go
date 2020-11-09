@@ -9,46 +9,46 @@ import (
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/dialect/sql/sqlgraph"
 	"github.com/facebook/ent/schema/field"
-	"github.com/masseelch/go-api-skeleton/ent/group"
 	"github.com/masseelch/go-api-skeleton/ent/predicate"
+	"github.com/masseelch/go-api-skeleton/ent/tag"
 )
 
-// GroupDelete is the builder for deleting a Group entity.
-type GroupDelete struct {
+// TagDelete is the builder for deleting a Tag entity.
+type TagDelete struct {
 	config
 	hooks    []Hook
-	mutation *GroupMutation
+	mutation *TagMutation
 }
 
 // Where adds a new predicate to the delete builder.
-func (gd *GroupDelete) Where(ps ...predicate.Group) *GroupDelete {
-	gd.mutation.predicates = append(gd.mutation.predicates, ps...)
-	return gd
+func (td *TagDelete) Where(ps ...predicate.Tag) *TagDelete {
+	td.mutation.predicates = append(td.mutation.predicates, ps...)
+	return td
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (gd *GroupDelete) Exec(ctx context.Context) (int, error) {
+func (td *TagDelete) Exec(ctx context.Context) (int, error) {
 	var (
 		err      error
 		affected int
 	)
-	if len(gd.hooks) == 0 {
-		affected, err = gd.sqlExec(ctx)
+	if len(td.hooks) == 0 {
+		affected, err = td.sqlExec(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*GroupMutation)
+			mutation, ok := m.(*TagMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
 			}
-			gd.mutation = mutation
-			affected, err = gd.sqlExec(ctx)
+			td.mutation = mutation
+			affected, err = td.sqlExec(ctx)
 			mutation.done = true
 			return affected, err
 		})
-		for i := len(gd.hooks) - 1; i >= 0; i-- {
-			mut = gd.hooks[i](mut)
+		for i := len(td.hooks) - 1; i >= 0; i-- {
+			mut = td.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, gd.mutation); err != nil {
+		if _, err := mut.Mutate(ctx, td.mutation); err != nil {
 			return 0, err
 		}
 	}
@@ -56,53 +56,53 @@ func (gd *GroupDelete) Exec(ctx context.Context) (int, error) {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (gd *GroupDelete) ExecX(ctx context.Context) int {
-	n, err := gd.Exec(ctx)
+func (td *TagDelete) ExecX(ctx context.Context) int {
+	n, err := td.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (gd *GroupDelete) sqlExec(ctx context.Context) (int, error) {
+func (td *TagDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := &sqlgraph.DeleteSpec{
 		Node: &sqlgraph.NodeSpec{
-			Table: group.Table,
+			Table: tag.Table,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
-				Column: group.FieldID,
+				Column: tag.FieldID,
 			},
 		},
 	}
-	if ps := gd.mutation.predicates; len(ps) > 0 {
+	if ps := td.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	return sqlgraph.DeleteNodes(ctx, gd.driver, _spec)
+	return sqlgraph.DeleteNodes(ctx, td.driver, _spec)
 }
 
-// GroupDeleteOne is the builder for deleting a single Group entity.
-type GroupDeleteOne struct {
-	gd *GroupDelete
+// TagDeleteOne is the builder for deleting a single Tag entity.
+type TagDeleteOne struct {
+	td *TagDelete
 }
 
 // Exec executes the deletion query.
-func (gdo *GroupDeleteOne) Exec(ctx context.Context) error {
-	n, err := gdo.gd.Exec(ctx)
+func (tdo *TagDeleteOne) Exec(ctx context.Context) error {
+	n, err := tdo.td.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
 	case n == 0:
-		return &NotFoundError{group.Label}
+		return &NotFoundError{tag.Label}
 	default:
 		return nil
 	}
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (gdo *GroupDeleteOne) ExecX(ctx context.Context) {
-	gdo.gd.ExecX(ctx)
+func (tdo *TagDeleteOne) ExecX(ctx context.Context) {
+	tdo.td.ExecX(ctx)
 }

@@ -14,7 +14,7 @@ import (
 	"github.com/masseelch/go-api-skeleton/ent/predicate"
 	"github.com/masseelch/go-api-skeleton/ent/session"
 	"github.com/masseelch/go-api-skeleton/ent/user"
-	go_token "github.com/masseelch/go-token"
+	"github.com/masseelch/go-token"
 )
 
 // SessionQuery is the builder for querying Session entities.
@@ -101,8 +101,8 @@ func (sq *SessionQuery) FirstX(ctx context.Context) *Session {
 }
 
 // FirstID returns the first Session id in the query. Returns *NotFoundError when no id was found.
-func (sq *SessionQuery) FirstID(ctx context.Context) (id go_token.Token, err error) {
-	var ids []go_token.Token
+func (sq *SessionQuery) FirstID(ctx context.Context) (id token.Token, err error) {
+	var ids []token.Token
 	if ids, err = sq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -114,7 +114,7 @@ func (sq *SessionQuery) FirstID(ctx context.Context) (id go_token.Token, err err
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (sq *SessionQuery) FirstIDX(ctx context.Context) go_token.Token {
+func (sq *SessionQuery) FirstIDX(ctx context.Context) token.Token {
 	id, err := sq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -148,8 +148,8 @@ func (sq *SessionQuery) OnlyX(ctx context.Context) *Session {
 }
 
 // OnlyID returns the only Session id in the query, returns an error if not exactly one id was returned.
-func (sq *SessionQuery) OnlyID(ctx context.Context) (id go_token.Token, err error) {
-	var ids []go_token.Token
+func (sq *SessionQuery) OnlyID(ctx context.Context) (id token.Token, err error) {
+	var ids []token.Token
 	if ids, err = sq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -165,7 +165,7 @@ func (sq *SessionQuery) OnlyID(ctx context.Context) (id go_token.Token, err erro
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (sq *SessionQuery) OnlyIDX(ctx context.Context) go_token.Token {
+func (sq *SessionQuery) OnlyIDX(ctx context.Context) token.Token {
 	id, err := sq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -191,8 +191,8 @@ func (sq *SessionQuery) AllX(ctx context.Context) []*Session {
 }
 
 // IDs executes the query and returns a list of Session ids.
-func (sq *SessionQuery) IDs(ctx context.Context) ([]go_token.Token, error) {
-	var ids []go_token.Token
+func (sq *SessionQuery) IDs(ctx context.Context) ([]token.Token, error) {
+	var ids []token.Token
 	if err := sq.Select(session.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -200,7 +200,7 @@ func (sq *SessionQuery) IDs(ctx context.Context) ([]go_token.Token, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (sq *SessionQuery) IDsX(ctx context.Context) []go_token.Token {
+func (sq *SessionQuery) IDsX(ctx context.Context) []token.Token {
 	ids, err := sq.IDs(ctx)
 	if err != nil {
 		panic(err)

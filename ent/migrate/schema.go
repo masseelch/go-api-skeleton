@@ -8,36 +8,16 @@ import (
 )
 
 var (
-	// GroupsColumns holds the columns for the "groups" table.
-	GroupsColumns = []*schema.Column{
+	// AccountsColumns holds the columns for the "accounts" table.
+	AccountsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "title", Type: field.TypeString, Unique: true},
+		{Name: "title", Type: field.TypeString},
 	}
-	// GroupsTable holds the schema information for the "groups" table.
-	GroupsTable = &schema.Table{
-		Name:        "groups",
-		Columns:     GroupsColumns,
-		PrimaryKey:  []*schema.Column{GroupsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
-	}
-	// JobsColumns holds the columns for the "jobs" table.
-	JobsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "date", Type: field.TypeTime, Nullable: true},
-		{Name: "task", Type: field.TypeString, Size: 2147483647},
-		{Name: "state", Type: field.TypeString, Default: "open"},
-		{Name: "report", Type: field.TypeString, Nullable: true, Size: 2147483647},
-		{Name: "rest", Type: field.TypeString, Nullable: true, Size: 2147483647},
-		{Name: "note", Type: field.TypeString, Nullable: true, Size: 2147483647},
-		{Name: "customer_name", Type: field.TypeString, Nullable: true},
-		{Name: "risk_assessment_required", Type: field.TypeBool},
-		{Name: "maintenance_required", Type: field.TypeBool},
-	}
-	// JobsTable holds the schema information for the "jobs" table.
-	JobsTable = &schema.Table{
-		Name:        "jobs",
-		Columns:     JobsColumns,
-		PrimaryKey:  []*schema.Column{JobsColumns[0]},
+	// AccountsTable holds the schema information for the "accounts" table.
+	AccountsTable = &schema.Table{
+		Name:        "accounts",
+		Columns:     AccountsColumns,
+		PrimaryKey:  []*schema.Column{AccountsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{},
 	}
 	// SessionsColumns holds the columns for the "sessions" table.
@@ -62,50 +42,76 @@ var (
 			},
 		},
 	}
+	// TagsColumns holds the columns for the "tags" table.
+	TagsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "title", Type: field.TypeString},
+		{Name: "description", Type: field.TypeString, Size: 2147483647},
+	}
+	// TagsTable holds the schema information for the "tags" table.
+	TagsTable = &schema.Table{
+		Name:        "tags",
+		Columns:     TagsColumns,
+		PrimaryKey:  []*schema.Column{TagsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
+	}
+	// TransactionsColumns holds the columns for the "transactions" table.
+	TransactionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "date", Type: field.TypeTime},
+		{Name: "amount", Type: field.TypeInt},
+		{Name: "user_transactions", Type: field.TypeInt, Nullable: true},
+	}
+	// TransactionsTable holds the schema information for the "transactions" table.
+	TransactionsTable = &schema.Table{
+		Name:       "transactions",
+		Columns:    TransactionsColumns,
+		PrimaryKey: []*schema.Column{TransactionsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:  "transactions_users_transactions",
+				Columns: []*schema.Column{TransactionsColumns[3]},
+
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "email", Type: field.TypeString, Unique: true},
 		{Name: "password", Type: field.TypeString},
 		{Name: "enabled", Type: field.TypeBool},
-		{Name: "group_users", Type: field.TypeInt, Nullable: true},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
-		Name:       "users",
-		Columns:    UsersColumns,
-		PrimaryKey: []*schema.Column{UsersColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:  "users_groups_users",
-				Columns: []*schema.Column{UsersColumns[4]},
-
-				RefColumns: []*schema.Column{GroupsColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
+		Name:        "users",
+		Columns:     UsersColumns,
+		PrimaryKey:  []*schema.Column{UsersColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{},
 	}
-	// JobUsersColumns holds the columns for the "job_users" table.
-	JobUsersColumns = []*schema.Column{
-		{Name: "job_id", Type: field.TypeInt},
+	// AccountUsersColumns holds the columns for the "account_users" table.
+	AccountUsersColumns = []*schema.Column{
+		{Name: "account_id", Type: field.TypeInt},
 		{Name: "user_id", Type: field.TypeInt},
 	}
-	// JobUsersTable holds the schema information for the "job_users" table.
-	JobUsersTable = &schema.Table{
-		Name:       "job_users",
-		Columns:    JobUsersColumns,
-		PrimaryKey: []*schema.Column{JobUsersColumns[0], JobUsersColumns[1]},
+	// AccountUsersTable holds the schema information for the "account_users" table.
+	AccountUsersTable = &schema.Table{
+		Name:       "account_users",
+		Columns:    AccountUsersColumns,
+		PrimaryKey: []*schema.Column{AccountUsersColumns[0], AccountUsersColumns[1]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:  "job_users_job_id",
-				Columns: []*schema.Column{JobUsersColumns[0]},
+				Symbol:  "account_users_account_id",
+				Columns: []*schema.Column{AccountUsersColumns[0]},
 
-				RefColumns: []*schema.Column{JobsColumns[0]},
+				RefColumns: []*schema.Column{AccountsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
-				Symbol:  "job_users_user_id",
-				Columns: []*schema.Column{JobUsersColumns[1]},
+				Symbol:  "account_users_user_id",
+				Columns: []*schema.Column{AccountUsersColumns[1]},
 
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
@@ -114,17 +120,18 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
-		GroupsTable,
-		JobsTable,
+		AccountsTable,
 		SessionsTable,
+		TagsTable,
+		TransactionsTable,
 		UsersTable,
-		JobUsersTable,
+		AccountUsersTable,
 	}
 )
 
 func init() {
 	SessionsTable.ForeignKeys[0].RefTable = UsersTable
-	UsersTable.ForeignKeys[0].RefTable = GroupsTable
-	JobUsersTable.ForeignKeys[0].RefTable = JobsTable
-	JobUsersTable.ForeignKeys[1].RefTable = UsersTable
+	TransactionsTable.ForeignKeys[0].RefTable = UsersTable
+	AccountUsersTable.ForeignKeys[0].RefTable = AccountsTable
+	AccountUsersTable.ForeignKeys[1].RefTable = UsersTable
 }

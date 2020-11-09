@@ -8,7 +8,7 @@ import (
 	"math/rand"
 )
 
-const userCount = 5
+const userCount = 2
 
 func (r refs) user() *ent.User {
 	m := r[userKey].([]*ent.User)
@@ -26,15 +26,13 @@ func users(refs refs, c *ent.Client) error {
 	b[0] = c.User.Create().
 		SetEmail("user@api.com").
 		SetPassword(string(p)).
-		SetEnabled(true).
-		SetGroup(refs.group())
+		SetEnabled(true)
 
 	for i := 1; i <= userCount; i++ {
 		b[i] = c.User.Create().
 			SetEmail(randomdata.Email()).
 			SetPassword(string(p)).
-			SetEnabled(true).
-			SetGroup(refs.group())
+			SetEnabled(true)
 	}
 
 	refs[userKey], err = c.User.CreateBulk(b...).Save(context.Background())

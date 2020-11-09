@@ -11,14 +11,15 @@ import (
 	"github.com/masseelch/render"
 
 	"github.com/masseelch/go-api-skeleton/ent"
-	"github.com/masseelch/go-api-skeleton/ent/group"
-	"github.com/masseelch/go-api-skeleton/ent/job"
+	"github.com/masseelch/go-api-skeleton/ent/account"
+	"github.com/masseelch/go-api-skeleton/ent/tag"
+	"github.com/masseelch/go-api-skeleton/ent/transaction"
 	"github.com/masseelch/go-api-skeleton/ent/user"
 )
 
-// This function fetches the Group model identified by a give url-parameter from
+// This function fetches the Account model identified by a give url-parameter from
 // database and returns it to the client.
-func (h GroupHandler) Read(w http.ResponseWriter, r *http.Request) {
+func (h AccountHandler) Read(w http.ResponseWriter, r *http.Request) {
 	idp := chi.URLParam(r, "id")
 	if idp == "" {
 		h.logger.WithField("id", idp).Info("empty 'id' url param")
@@ -33,38 +34,38 @@ func (h GroupHandler) Read(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// todo - nested eager loading?
-	e, err := h.client.Group.Query().Where(group.ID(id)).Only(r.Context())
+	e, err := h.client.Account.Query().Where(account.ID(id)).Only(r.Context())
 	if err != nil {
 		switch err.(type) {
 		case *ent.NotFoundError:
-			h.logger.WithError(err).WithField("Group.id", id).Debug("job not found")
+			h.logger.WithError(err).WithField("Account.id", id).Debug("job not found")
 			render.NotFound(w, r, err)
 			return
 		case *ent.NotSingularError:
-			h.logger.WithError(err).WithField("Group.id", id).Error("duplicate entry for id")
+			h.logger.WithError(err).WithField("Account.id", id).Error("duplicate entry for id")
 			render.InternalServerError(w, r, nil)
 			return
 		default:
-			h.logger.WithError(err).WithField("Group.id", id).Error("error fetching node from db")
+			h.logger.WithError(err).WithField("Account.id", id).Error("error fetching node from db")
 			render.InternalServerError(w, r, nil)
 			return
 		}
 	}
 
-	d, err := sheriff.Marshal(&sheriff.Options{Groups: []string{"group:list"}}, e)
+	d, err := sheriff.Marshal(&sheriff.Options{Groups: []string{"account:list"}}, e)
 	if err != nil {
-		h.logger.WithError(err).WithField("Group.id", id).Error("serialization error")
+		h.logger.WithError(err).WithField("Account.id", id).Error("serialization error")
 		render.InternalServerError(w, r, nil)
 		return
 	}
 
-	h.logger.WithField("group", e.ID).Info("group rendered")
+	h.logger.WithField("account", e.ID).Info("account rendered")
 	render.OK(w, r, d)
 }
 
-// This function fetches the Job model identified by a give url-parameter from
+// This function fetches the Tag model identified by a give url-parameter from
 // database and returns it to the client.
-func (h JobHandler) Read(w http.ResponseWriter, r *http.Request) {
+func (h TagHandler) Read(w http.ResponseWriter, r *http.Request) {
 	idp := chi.URLParam(r, "id")
 	if idp == "" {
 		h.logger.WithField("id", idp).Info("empty 'id' url param")
@@ -79,32 +80,78 @@ func (h JobHandler) Read(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// todo - nested eager loading?
-	e, err := h.client.Job.Query().Where(job.ID(id)).WithUsers().Only(r.Context())
+	e, err := h.client.Tag.Query().Where(tag.ID(id)).Only(r.Context())
 	if err != nil {
 		switch err.(type) {
 		case *ent.NotFoundError:
-			h.logger.WithError(err).WithField("Job.id", id).Debug("job not found")
+			h.logger.WithError(err).WithField("Tag.id", id).Debug("job not found")
 			render.NotFound(w, r, err)
 			return
 		case *ent.NotSingularError:
-			h.logger.WithError(err).WithField("Job.id", id).Error("duplicate entry for id")
+			h.logger.WithError(err).WithField("Tag.id", id).Error("duplicate entry for id")
 			render.InternalServerError(w, r, nil)
 			return
 		default:
-			h.logger.WithError(err).WithField("Job.id", id).Error("error fetching node from db")
+			h.logger.WithError(err).WithField("Tag.id", id).Error("error fetching node from db")
 			render.InternalServerError(w, r, nil)
 			return
 		}
 	}
 
-	d, err := sheriff.Marshal(&sheriff.Options{Groups: []string{"job:read", "user:list"}}, e)
+	d, err := sheriff.Marshal(&sheriff.Options{Groups: []string{"tag:list"}}, e)
 	if err != nil {
-		h.logger.WithError(err).WithField("Job.id", id).Error("serialization error")
+		h.logger.WithError(err).WithField("Tag.id", id).Error("serialization error")
 		render.InternalServerError(w, r, nil)
 		return
 	}
 
-	h.logger.WithField("job", e.ID).Info("job rendered")
+	h.logger.WithField("tag", e.ID).Info("tag rendered")
+	render.OK(w, r, d)
+}
+
+// This function fetches the Transaction model identified by a give url-parameter from
+// database and returns it to the client.
+func (h TransactionHandler) Read(w http.ResponseWriter, r *http.Request) {
+	idp := chi.URLParam(r, "id")
+	if idp == "" {
+		h.logger.WithField("id", idp).Info("empty 'id' url param")
+		render.BadRequest(w, r, "id cannot be ''")
+		return
+	}
+	id, err := strconv.Atoi(idp)
+	if err != nil {
+		h.logger.WithField("id", idp).Info("error parsing url parameter 'id'")
+		render.BadRequest(w, r, "id must be a positive integer greater zero")
+		return
+	}
+
+	// todo - nested eager loading?
+	e, err := h.client.Transaction.Query().Where(transaction.ID(id)).Only(r.Context())
+	if err != nil {
+		switch err.(type) {
+		case *ent.NotFoundError:
+			h.logger.WithError(err).WithField("Transaction.id", id).Debug("job not found")
+			render.NotFound(w, r, err)
+			return
+		case *ent.NotSingularError:
+			h.logger.WithError(err).WithField("Transaction.id", id).Error("duplicate entry for id")
+			render.InternalServerError(w, r, nil)
+			return
+		default:
+			h.logger.WithError(err).WithField("Transaction.id", id).Error("error fetching node from db")
+			render.InternalServerError(w, r, nil)
+			return
+		}
+	}
+
+	d, err := sheriff.Marshal(&sheriff.Options{Groups: []string{"transaction:list"}}, e)
+	if err != nil {
+		h.logger.WithError(err).WithField("Transaction.id", id).Error("serialization error")
+		render.InternalServerError(w, r, nil)
+		return
+	}
+
+	h.logger.WithField("transaction", e.ID).Info("transaction rendered")
 	render.OK(w, r, d)
 }
 

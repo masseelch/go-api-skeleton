@@ -9,28 +9,15 @@ import (
 	"github.com/masseelch/go-api-skeleton/ent"
 )
 
-// The GroupFunc type is an adapter to allow the use of ordinary
-// function as Group mutator.
-type GroupFunc func(context.Context, *ent.GroupMutation) (ent.Value, error)
+// The AccountFunc type is an adapter to allow the use of ordinary
+// function as Account mutator.
+type AccountFunc func(context.Context, *ent.AccountMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f GroupFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.GroupMutation)
+func (f AccountFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.AccountMutation)
 	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.GroupMutation", m)
-	}
-	return f(ctx, mv)
-}
-
-// The JobFunc type is an adapter to allow the use of ordinary
-// function as Job mutator.
-type JobFunc func(context.Context, *ent.JobMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f JobFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.JobMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.JobMutation", m)
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AccountMutation", m)
 	}
 	return f(ctx, mv)
 }
@@ -44,6 +31,32 @@ func (f SessionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, err
 	mv, ok := m.(*ent.SessionMutation)
 	if !ok {
 		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SessionMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The TagFunc type is an adapter to allow the use of ordinary
+// function as Tag mutator.
+type TagFunc func(context.Context, *ent.TagMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f TagFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.TagMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TagMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The TransactionFunc type is an adapter to allow the use of ordinary
+// function as Transaction mutator.
+type TransactionFunc func(context.Context, *ent.TransactionMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f TransactionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.TransactionMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TransactionMutation", m)
 	}
 	return f(ctx, mv)
 }

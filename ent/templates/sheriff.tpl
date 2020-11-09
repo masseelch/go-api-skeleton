@@ -1,18 +1,4 @@
-{{ define "sheriff" }}
-
-    {{ $pkg := base $.Config.Package }}
-    {{ template "header" $ }}
-
-    import (
-        "error"
-
-        "github.com/liip/sheriff"
-    )
-
-    {{ range $n := $.Nodes }}
-        {{ $receiver := $n.Receiver }}
-        func ({{ $receiver }} *{{ $n.Name }}) Marshal(options *sheriff.Options) (interface{}, error) {
-            return sheriff.Marshal(options, {{ $receiver }})
-        }
-    {{ end }}
+{{ define "model/stringer" }}
+    // Get rid of the fmt.Stringer implementation since it breaks liip/sheriff.
+    // This lines have to be here since template/text does skip empty templates.
 {{ end }}

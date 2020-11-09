@@ -11,7 +11,10 @@ type (
 	}
 	// Used on fields pass options to the handler generator.
 	FieldAnnotation struct {
-		Create bool
+		Create              bool
+		CreateValidationTag string
+		Patch               bool
+		PatchValidationTag  string
 	}
 )
 

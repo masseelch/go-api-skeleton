@@ -9,12 +9,11 @@ import (
 
 	"github.com/facebook/ent/dialect/sql/sqlgraph"
 	"github.com/facebook/ent/schema/field"
-	"github.com/masseelch/go-api-skeleton/ent/user"
-
-	"github.com/masseelch/go-api-skeleton/ent/group"
-	"github.com/masseelch/go-api-skeleton/ent/job"
+	"github.com/masseelch/go-api-skeleton/ent/account"
 	"github.com/masseelch/go-api-skeleton/ent/session"
-	go_token "github.com/masseelch/go-token"
+	"github.com/masseelch/go-api-skeleton/ent/transaction"
+	"github.com/masseelch/go-api-skeleton/ent/user"
+	"github.com/masseelch/go-token"
 )
 
 // UserCreate is the builder for creating a User entity.
@@ -57,52 +56,48 @@ func (uc *UserCreate) SetID(i int) *UserCreate {
 }
 
 // AddSessionIDs adds the sessions edge to Session by ids.
-func (uc *UserCreate) AddSessionIDs(ids ...go_token.Token) *UserCreate {
+func (uc *UserCreate) AddSessionIDs(ids ...token.Token) *UserCreate {
 	uc.mutation.AddSessionIDs(ids...)
 	return uc
 }
 
 // AddSessions adds the sessions edges to Session.
 func (uc *UserCreate) AddSessions(s ...*Session) *UserCreate {
-	ids := make([]go_token.Token, len(s))
+	ids := make([]token.Token, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
 	return uc.AddSessionIDs(ids...)
 }
 
-// AddJobIDs adds the jobs edge to Job by ids.
-func (uc *UserCreate) AddJobIDs(ids ...int) *UserCreate {
-	uc.mutation.AddJobIDs(ids...)
+// AddAccountIDs adds the accounts edge to Account by ids.
+func (uc *UserCreate) AddAccountIDs(ids ...int) *UserCreate {
+	uc.mutation.AddAccountIDs(ids...)
 	return uc
 }
 
-// AddJobs adds the jobs edges to Job.
-func (uc *UserCreate) AddJobs(j ...*Job) *UserCreate {
-	ids := make([]int, len(j))
-	for i := range j {
-		ids[i] = j[i].ID
+// AddAccounts adds the accounts edges to Account.
+func (uc *UserCreate) AddAccounts(a ...*Account) *UserCreate {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
 	}
-	return uc.AddJobIDs(ids...)
+	return uc.AddAccountIDs(ids...)
 }
 
-// SetGroupID sets the group edge to Group by id.
-func (uc *UserCreate) SetGroupID(id int) *UserCreate {
-	uc.mutation.SetGroupID(id)
+// AddTransactionIDs adds the transactions edge to Transaction by ids.
+func (uc *UserCreate) AddTransactionIDs(ids ...int) *UserCreate {
+	uc.mutation.AddTransactionIDs(ids...)
 	return uc
 }
 
-// SetNillableGroupID sets the group edge to Group by id if the given value is not nil.
-func (uc *UserCreate) SetNillableGroupID(id *int) *UserCreate {
-	if id != nil {
-		uc = uc.SetGroupID(*id)
+// AddTransactions adds the transactions edges to Transaction.
+func (uc *UserCreate) AddTransactions(t ...*Transaction) *UserCreate {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
 	}
-	return uc
-}
-
-// SetGroup sets the group edge to Group.
-func (uc *UserCreate) SetGroup(g *Group) *UserCreate {
-	return uc.SetGroupID(g.ID)
+	return uc.AddTransactionIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -255,17 +250,17 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := uc.mutation.JobsIDs(); len(nodes) > 0 {
+	if nodes := uc.mutation.AccountsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
-			Table:   user.JobsTable,
-			Columns: user.JobsPrimaryKey,
+			Table:   user.AccountsTable,
+			Columns: user.AccountsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: job.FieldID,
+					Column: account.FieldID,
 				},
 			},
 		}
@@ -274,17 +269,17 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := uc.mutation.GroupIDs(); len(nodes) > 0 {
+	if nodes := uc.mutation.TransactionsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   user.GroupTable,
-			Columns: []string{user.GroupColumn},
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.TransactionsTable,
+			Columns: []string{user.TransactionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: group.FieldID,
+					Column: transaction.FieldID,
 				},
 			},
 		}

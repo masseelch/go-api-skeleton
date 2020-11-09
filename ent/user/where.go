@@ -376,25 +376,25 @@ func HasSessionsWith(preds ...predicate.Session) predicate.User {
 	})
 }
 
-// HasJobs applies the HasEdge predicate on the "jobs" edge.
-func HasJobs() predicate.User {
+// HasAccounts applies the HasEdge predicate on the "accounts" edge.
+func HasAccounts() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(JobsTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, JobsTable, JobsPrimaryKey...),
+			sqlgraph.To(AccountsTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, AccountsTable, AccountsPrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasJobsWith applies the HasEdge predicate on the "jobs" edge with a given conditions (other predicates).
-func HasJobsWith(preds ...predicate.Job) predicate.User {
+// HasAccountsWith applies the HasEdge predicate on the "accounts" edge with a given conditions (other predicates).
+func HasAccountsWith(preds ...predicate.Account) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(JobsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, JobsTable, JobsPrimaryKey...),
+			sqlgraph.To(AccountsInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, AccountsTable, AccountsPrimaryKey...),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
@@ -404,25 +404,25 @@ func HasJobsWith(preds ...predicate.Job) predicate.User {
 	})
 }
 
-// HasGroup applies the HasEdge predicate on the "group" edge.
-func HasGroup() predicate.User {
+// HasTransactions applies the HasEdge predicate on the "transactions" edge.
+func HasTransactions() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(GroupTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, GroupTable, GroupColumn),
+			sqlgraph.To(TransactionsTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, TransactionsTable, TransactionsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasGroupWith applies the HasEdge predicate on the "group" edge with a given conditions (other predicates).
-func HasGroupWith(preds ...predicate.Group) predicate.User {
+// HasTransactionsWith applies the HasEdge predicate on the "transactions" edge with a given conditions (other predicates).
+func HasTransactionsWith(preds ...predicate.Transaction) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(GroupInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, GroupTable, GroupColumn),
+			sqlgraph.To(TransactionsInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, TransactionsTable, TransactionsColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

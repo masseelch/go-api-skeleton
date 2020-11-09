@@ -17,7 +17,7 @@ type Session struct {
 func (Session) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("id").
-			GoType(go_token.Token("")).
+			GoType(token.Token("")).
 			StructTag(`json:"token"`),
 		field.Time("idleTimeExpiredAt"),
 		field.Time("lifeTimeExpiredAt").

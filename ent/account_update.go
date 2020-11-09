@@ -9,94 +9,94 @@ import (
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/dialect/sql/sqlgraph"
 	"github.com/facebook/ent/schema/field"
-	"github.com/masseelch/go-api-skeleton/ent/group"
+	"github.com/masseelch/go-api-skeleton/ent/account"
 	"github.com/masseelch/go-api-skeleton/ent/predicate"
 	"github.com/masseelch/go-api-skeleton/ent/user"
 )
 
-// GroupUpdate is the builder for updating Group entities.
-type GroupUpdate struct {
+// AccountUpdate is the builder for updating Account entities.
+type AccountUpdate struct {
 	config
 	hooks    []Hook
-	mutation *GroupMutation
+	mutation *AccountMutation
 }
 
 // Where adds a new predicate for the builder.
-func (gu *GroupUpdate) Where(ps ...predicate.Group) *GroupUpdate {
-	gu.mutation.predicates = append(gu.mutation.predicates, ps...)
-	return gu
+func (au *AccountUpdate) Where(ps ...predicate.Account) *AccountUpdate {
+	au.mutation.predicates = append(au.mutation.predicates, ps...)
+	return au
 }
 
 // SetTitle sets the title field.
-func (gu *GroupUpdate) SetTitle(s string) *GroupUpdate {
-	gu.mutation.SetTitle(s)
-	return gu
+func (au *AccountUpdate) SetTitle(s string) *AccountUpdate {
+	au.mutation.SetTitle(s)
+	return au
 }
 
 // AddUserIDs adds the users edge to User by ids.
-func (gu *GroupUpdate) AddUserIDs(ids ...int) *GroupUpdate {
-	gu.mutation.AddUserIDs(ids...)
-	return gu
+func (au *AccountUpdate) AddUserIDs(ids ...int) *AccountUpdate {
+	au.mutation.AddUserIDs(ids...)
+	return au
 }
 
 // AddUsers adds the users edges to User.
-func (gu *GroupUpdate) AddUsers(u ...*User) *GroupUpdate {
+func (au *AccountUpdate) AddUsers(u ...*User) *AccountUpdate {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return gu.AddUserIDs(ids...)
+	return au.AddUserIDs(ids...)
 }
 
-// Mutation returns the GroupMutation object of the builder.
-func (gu *GroupUpdate) Mutation() *GroupMutation {
-	return gu.mutation
+// Mutation returns the AccountMutation object of the builder.
+func (au *AccountUpdate) Mutation() *AccountMutation {
+	return au.mutation
 }
 
 // ClearUsers clears all "users" edges to type User.
-func (gu *GroupUpdate) ClearUsers() *GroupUpdate {
-	gu.mutation.ClearUsers()
-	return gu
+func (au *AccountUpdate) ClearUsers() *AccountUpdate {
+	au.mutation.ClearUsers()
+	return au
 }
 
 // RemoveUserIDs removes the users edge to User by ids.
-func (gu *GroupUpdate) RemoveUserIDs(ids ...int) *GroupUpdate {
-	gu.mutation.RemoveUserIDs(ids...)
-	return gu
+func (au *AccountUpdate) RemoveUserIDs(ids ...int) *AccountUpdate {
+	au.mutation.RemoveUserIDs(ids...)
+	return au
 }
 
 // RemoveUsers removes users edges to User.
-func (gu *GroupUpdate) RemoveUsers(u ...*User) *GroupUpdate {
+func (au *AccountUpdate) RemoveUsers(u ...*User) *AccountUpdate {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return gu.RemoveUserIDs(ids...)
+	return au.RemoveUserIDs(ids...)
 }
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
-func (gu *GroupUpdate) Save(ctx context.Context) (int, error) {
+func (au *AccountUpdate) Save(ctx context.Context) (int, error) {
 	var (
 		err      error
 		affected int
 	)
-	if len(gu.hooks) == 0 {
-		affected, err = gu.sqlSave(ctx)
+	if len(au.hooks) == 0 {
+		affected, err = au.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*GroupMutation)
+			mutation, ok := m.(*AccountMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
 			}
-			gu.mutation = mutation
-			affected, err = gu.sqlSave(ctx)
+			au.mutation = mutation
+			affected, err = au.sqlSave(ctx)
 			mutation.done = true
 			return affected, err
 		})
-		for i := len(gu.hooks) - 1; i >= 0; i-- {
-			mut = gu.hooks[i](mut)
+		for i := len(au.hooks) - 1; i >= 0; i-- {
+			mut = au.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, gu.mutation); err != nil {
+		if _, err := mut.Mutate(ctx, au.mutation); err != nil {
 			return 0, err
 		}
 	}
@@ -104,8 +104,8 @@ func (gu *GroupUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (gu *GroupUpdate) SaveX(ctx context.Context) int {
-	affected, err := gu.Save(ctx)
+func (au *AccountUpdate) SaveX(ctx context.Context) int {
+	affected, err := au.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -113,49 +113,49 @@ func (gu *GroupUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (gu *GroupUpdate) Exec(ctx context.Context) error {
-	_, err := gu.Save(ctx)
+func (au *AccountUpdate) Exec(ctx context.Context) error {
+	_, err := au.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (gu *GroupUpdate) ExecX(ctx context.Context) {
-	if err := gu.Exec(ctx); err != nil {
+func (au *AccountUpdate) ExecX(ctx context.Context) {
+	if err := au.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (au *AccountUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
-			Table:   group.Table,
-			Columns: group.Columns,
+			Table:   account.Table,
+			Columns: account.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
-				Column: group.FieldID,
+				Column: account.FieldID,
 			},
 		},
 	}
-	if ps := gu.mutation.predicates; len(ps) > 0 {
+	if ps := au.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := gu.mutation.Title(); ok {
+	if value, ok := au.mutation.Title(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: group.FieldTitle,
+			Column: account.FieldTitle,
 		})
 	}
-	if gu.mutation.UsersCleared() {
+	if au.mutation.UsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
-			Table:   group.UsersTable,
-			Columns: []string{group.UsersColumn},
+			Table:   account.UsersTable,
+			Columns: account.UsersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -166,12 +166,12 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := gu.mutation.RemovedUsersIDs(); len(nodes) > 0 && !gu.mutation.UsersCleared() {
+	if nodes := au.mutation.RemovedUsersIDs(); len(nodes) > 0 && !au.mutation.UsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
-			Table:   group.UsersTable,
-			Columns: []string{group.UsersColumn},
+			Table:   account.UsersTable,
+			Columns: account.UsersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -185,12 +185,12 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := gu.mutation.UsersIDs(); len(nodes) > 0 {
+	if nodes := au.mutation.UsersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
-			Table:   group.UsersTable,
-			Columns: []string{group.UsersColumn},
+			Table:   account.UsersTable,
+			Columns: account.UsersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -204,9 +204,9 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, gu.driver, _spec); err != nil {
+	if n, err = sqlgraph.UpdateNodes(ctx, au.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
-			err = &NotFoundError{group.Label}
+			err = &NotFoundError{account.Label}
 		} else if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}
@@ -215,83 +215,83 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	return n, nil
 }
 
-// GroupUpdateOne is the builder for updating a single Group entity.
-type GroupUpdateOne struct {
+// AccountUpdateOne is the builder for updating a single Account entity.
+type AccountUpdateOne struct {
 	config
 	hooks    []Hook
-	mutation *GroupMutation
+	mutation *AccountMutation
 }
 
 // SetTitle sets the title field.
-func (guo *GroupUpdateOne) SetTitle(s string) *GroupUpdateOne {
-	guo.mutation.SetTitle(s)
-	return guo
+func (auo *AccountUpdateOne) SetTitle(s string) *AccountUpdateOne {
+	auo.mutation.SetTitle(s)
+	return auo
 }
 
 // AddUserIDs adds the users edge to User by ids.
-func (guo *GroupUpdateOne) AddUserIDs(ids ...int) *GroupUpdateOne {
-	guo.mutation.AddUserIDs(ids...)
-	return guo
+func (auo *AccountUpdateOne) AddUserIDs(ids ...int) *AccountUpdateOne {
+	auo.mutation.AddUserIDs(ids...)
+	return auo
 }
 
 // AddUsers adds the users edges to User.
-func (guo *GroupUpdateOne) AddUsers(u ...*User) *GroupUpdateOne {
+func (auo *AccountUpdateOne) AddUsers(u ...*User) *AccountUpdateOne {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return guo.AddUserIDs(ids...)
+	return auo.AddUserIDs(ids...)
 }
 
-// Mutation returns the GroupMutation object of the builder.
-func (guo *GroupUpdateOne) Mutation() *GroupMutation {
-	return guo.mutation
+// Mutation returns the AccountMutation object of the builder.
+func (auo *AccountUpdateOne) Mutation() *AccountMutation {
+	return auo.mutation
 }
 
 // ClearUsers clears all "users" edges to type User.
-func (guo *GroupUpdateOne) ClearUsers() *GroupUpdateOne {
-	guo.mutation.ClearUsers()
-	return guo
+func (auo *AccountUpdateOne) ClearUsers() *AccountUpdateOne {
+	auo.mutation.ClearUsers()
+	return auo
 }
 
 // RemoveUserIDs removes the users edge to User by ids.
-func (guo *GroupUpdateOne) RemoveUserIDs(ids ...int) *GroupUpdateOne {
-	guo.mutation.RemoveUserIDs(ids...)
-	return guo
+func (auo *AccountUpdateOne) RemoveUserIDs(ids ...int) *AccountUpdateOne {
+	auo.mutation.RemoveUserIDs(ids...)
+	return auo
 }
 
 // RemoveUsers removes users edges to User.
-func (guo *GroupUpdateOne) RemoveUsers(u ...*User) *GroupUpdateOne {
+func (auo *AccountUpdateOne) RemoveUsers(u ...*User) *AccountUpdateOne {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return guo.RemoveUserIDs(ids...)
+	return auo.RemoveUserIDs(ids...)
 }
 
 // Save executes the query and returns the updated entity.
-func (guo *GroupUpdateOne) Save(ctx context.Context) (*Group, error) {
+func (auo *AccountUpdateOne) Save(ctx context.Context) (*Account, error) {
 	var (
 		err  error
-		node *Group
+		node *Account
 	)
-	if len(guo.hooks) == 0 {
-		node, err = guo.sqlSave(ctx)
+	if len(auo.hooks) == 0 {
+		node, err = auo.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*GroupMutation)
+			mutation, ok := m.(*AccountMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
 			}
-			guo.mutation = mutation
-			node, err = guo.sqlSave(ctx)
+			auo.mutation = mutation
+			node, err = auo.sqlSave(ctx)
 			mutation.done = true
 			return node, err
 		})
-		for i := len(guo.hooks) - 1; i >= 0; i-- {
-			mut = guo.hooks[i](mut)
+		for i := len(auo.hooks) - 1; i >= 0; i-- {
+			mut = auo.hooks[i](mut)
 		}
-		if _, err := mut.Mutate(ctx, guo.mutation); err != nil {
+		if _, err := mut.Mutate(ctx, auo.mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -299,8 +299,8 @@ func (guo *GroupUpdateOne) Save(ctx context.Context) (*Group, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (guo *GroupUpdateOne) SaveX(ctx context.Context) *Group {
-	node, err := guo.Save(ctx)
+func (auo *AccountUpdateOne) SaveX(ctx context.Context) *Account {
+	node, err := auo.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -308,47 +308,47 @@ func (guo *GroupUpdateOne) SaveX(ctx context.Context) *Group {
 }
 
 // Exec executes the query on the entity.
-func (guo *GroupUpdateOne) Exec(ctx context.Context) error {
-	_, err := guo.Save(ctx)
+func (auo *AccountUpdateOne) Exec(ctx context.Context) error {
+	_, err := auo.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (guo *GroupUpdateOne) ExecX(ctx context.Context) {
-	if err := guo.Exec(ctx); err != nil {
+func (auo *AccountUpdateOne) ExecX(ctx context.Context) {
+	if err := auo.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error) {
+func (auo *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
-			Table:   group.Table,
-			Columns: group.Columns,
+			Table:   account.Table,
+			Columns: account.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
-				Column: group.FieldID,
+				Column: account.FieldID,
 			},
 		},
 	}
-	id, ok := guo.mutation.ID()
+	id, ok := auo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Group.ID for update")}
+		return nil, &ValidationError{Name: "ID", err: fmt.Errorf("missing Account.ID for update")}
 	}
 	_spec.Node.ID.Value = id
-	if value, ok := guo.mutation.Title(); ok {
+	if value, ok := auo.mutation.Title(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: group.FieldTitle,
+			Column: account.FieldTitle,
 		})
 	}
-	if guo.mutation.UsersCleared() {
+	if auo.mutation.UsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
-			Table:   group.UsersTable,
-			Columns: []string{group.UsersColumn},
+			Table:   account.UsersTable,
+			Columns: account.UsersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -359,12 +359,12 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := guo.mutation.RemovedUsersIDs(); len(nodes) > 0 && !guo.mutation.UsersCleared() {
+	if nodes := auo.mutation.RemovedUsersIDs(); len(nodes) > 0 && !auo.mutation.UsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
-			Table:   group.UsersTable,
-			Columns: []string{group.UsersColumn},
+			Table:   account.UsersTable,
+			Columns: account.UsersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -378,12 +378,12 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := guo.mutation.UsersIDs(); len(nodes) > 0 {
+	if nodes := auo.mutation.UsersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
-			Table:   group.UsersTable,
-			Columns: []string{group.UsersColumn},
+			Table:   account.UsersTable,
+			Columns: account.UsersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -397,12 +397,12 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &Group{config: guo.config}
+	_node = &Account{config: auo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues()
-	if err = sqlgraph.UpdateNode(ctx, guo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, auo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
-			err = &NotFoundError{group.Label}
+			err = &NotFoundError{account.Label}
 		} else if cerr, ok := isSQLConstraintError(err); ok {
 			err = cerr
 		}

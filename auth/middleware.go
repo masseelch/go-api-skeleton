@@ -82,7 +82,7 @@ func SessionFromContext(ctx context.Context) *ent.Session {
 	return ctx.Value(sessionCtx).(*ent.Session)
 }
 
-func getTokenFromRequest(r *http.Request) go_token.Token {
+func getTokenFromRequest(r *http.Request) token.Token {
 	// Try to get token from header.
 	t := r.Header.Get("Authorization")
 
@@ -91,5 +91,5 @@ func getTokenFromRequest(r *http.Request) go_token.Token {
 		t = r.URL.Query().Get("auth")
 	}
 
-	return go_token.Token(t)
+	return token.Token(t)
 }

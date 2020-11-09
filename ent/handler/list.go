@@ -10,14 +10,15 @@ import (
 	"github.com/masseelch/render"
 	"github.com/sirupsen/logrus"
 
-	"github.com/masseelch/go-api-skeleton/ent/group"
-	"github.com/masseelch/go-api-skeleton/ent/job"
+	"github.com/masseelch/go-api-skeleton/ent/account"
+	"github.com/masseelch/go-api-skeleton/ent/tag"
+	"github.com/masseelch/go-api-skeleton/ent/transaction"
 	"github.com/masseelch/go-api-skeleton/ent/user"
 )
 
-// This function queries for Group models. Can be filtered by query parameters.
-func (h GroupHandler) List(w http.ResponseWriter, r *http.Request) {
-	q := h.client.Group.Query()
+// This function queries for Account models. Can be filtered by query parameters.
+func (h AccountHandler) List(w http.ResponseWriter, r *http.Request) {
+	q := h.client.Account.Query()
 
 	// Pagination. Default is 30 items per page.
 	page, itemsPerPage, err := pagination(w, r, h.logger)
@@ -26,9 +27,9 @@ func (h GroupHandler) List(w http.ResponseWriter, r *http.Request) {
 	}
 	q = q.Limit(itemsPerPage).Offset((page - 1) * itemsPerPage)
 
-	// Use the query parameters to filter the query.
+	// Use the query parameters to filter the query. todo - nested filter?
 	if f := r.URL.Query().Get("title"); f != "" {
-		q = q.Where(group.Title(f))
+		q = q.Where(account.Title(f))
 	}
 
 	es, err := q.All(r.Context())
@@ -38,7 +39,7 @@ func (h GroupHandler) List(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	d, err := sheriff.Marshal(&sheriff.Options{Groups: []string{"group:read"}}, es)
+	d, err := sheriff.Marshal(&sheriff.Options{Groups: []string{"account:read"}}, es)
 	if err != nil {
 		h.logger.WithError(err).Error("serialization error")
 		render.InternalServerError(w, r, nil)
@@ -49,9 +50,9 @@ func (h GroupHandler) List(w http.ResponseWriter, r *http.Request) {
 	render.OK(w, r, d)
 }
 
-// This function queries for Job models. Can be filtered by query parameters.
-func (h JobHandler) List(w http.ResponseWriter, r *http.Request) {
-	q := h.client.Job.Query()
+// This function queries for Tag models. Can be filtered by query parameters.
+func (h TagHandler) List(w http.ResponseWriter, r *http.Request) {
+	q := h.client.Tag.Query()
 
 	// Pagination. Default is 30 items per page.
 	page, itemsPerPage, err := pagination(w, r, h.logger)
@@ -60,61 +61,13 @@ func (h JobHandler) List(w http.ResponseWriter, r *http.Request) {
 	}
 	q = q.Limit(itemsPerPage).Offset((page - 1) * itemsPerPage)
 
-	// Use the query parameters to filter the query.
-	if f := r.URL.Query().Get("date"); f != "" {
-		// todo
+	// Use the query parameters to filter the query. todo - nested filter?
+	if f := r.URL.Query().Get("title"); f != "" {
+		q = q.Where(tag.Title(f))
 	}
 
-	if f := r.URL.Query().Get("task"); f != "" {
-		q = q.Where(job.Task(f))
-	}
-
-	if f := r.URL.Query().Get("state"); f != "" {
-		q = q.Where(job.State(f))
-	}
-
-	if f := r.URL.Query().Get("report"); f != "" {
-		q = q.Where(job.Report(f))
-	}
-
-	if f := r.URL.Query().Get("rest"); f != "" {
-		q = q.Where(job.Rest(f))
-	}
-
-	if f := r.URL.Query().Get("note"); f != "" {
-		q = q.Where(job.Note(f))
-	}
-
-	if f := r.URL.Query().Get("customerName"); f != "" {
-		q = q.Where(job.CustomerName(f))
-	}
-
-	if f := r.URL.Query().Get("riskAssessmentRequired"); f != "" {
-		var b bool
-		if f == "true" {
-			b = true
-		} else if f == "false" {
-			b = false
-		} else {
-			h.logger.WithError(err).WithField("riskAssessmentRequired", f).Debug("could not parse query parameter")
-			render.BadRequest(w, r, "'riskAssessmentRequired' must be 'true' or 'false'")
-			return
-		}
-		q = q.Where(job.RiskAssessmentRequired(b))
-	}
-
-	if f := r.URL.Query().Get("maintenanceRequired"); f != "" {
-		var b bool
-		if f == "true" {
-			b = true
-		} else if f == "false" {
-			b = false
-		} else {
-			h.logger.WithError(err).WithField("maintenanceRequired", f).Debug("could not parse query parameter")
-			render.BadRequest(w, r, "'maintenanceRequired' must be 'true' or 'false'")
-			return
-		}
-		q = q.Where(job.MaintenanceRequired(b))
+	if f := r.URL.Query().Get("description"); f != "" {
+		q = q.Where(tag.Description(f))
 	}
 
 	es, err := q.All(r.Context())
@@ -124,7 +77,51 @@ func (h JobHandler) List(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	d, err := sheriff.Marshal(&sheriff.Options{Groups: []string{"job:read", "user:list"}}, es)
+	d, err := sheriff.Marshal(&sheriff.Options{Groups: []string{"tag:read"}}, es)
+	if err != nil {
+		h.logger.WithError(err).Error("serialization error")
+		render.InternalServerError(w, r, nil)
+		return
+	}
+
+	h.logger.WithField("amount", len(es)).Info("jobs rendered")
+	render.OK(w, r, d)
+}
+
+// This function queries for Transaction models. Can be filtered by query parameters.
+func (h TransactionHandler) List(w http.ResponseWriter, r *http.Request) {
+	q := h.client.Transaction.Query()
+
+	// Pagination. Default is 30 items per page.
+	page, itemsPerPage, err := pagination(w, r, h.logger)
+	if err != nil {
+		return
+	}
+	q = q.Limit(itemsPerPage).Offset((page - 1) * itemsPerPage)
+
+	// Use the query parameters to filter the query. todo - nested filter?
+	if f := r.URL.Query().Get("date"); f != "" {
+		// todo
+	}
+
+	if f := r.URL.Query().Get("amount"); f != "" {
+		i, err := strconv.Atoi(f)
+		if err != nil {
+			h.logger.WithError(err).WithField("amount", f).Debug("could not parse query parameter")
+			render.BadRequest(w, r, "'amount' must be an integer")
+			return
+		}
+		q = q.Where(transaction.Amount(i))
+	}
+
+	es, err := q.All(r.Context())
+	if err != nil {
+		h.logger.WithError(err).Error("error querying database") // todo - better error
+		render.InternalServerError(w, r, nil)
+		return
+	}
+
+	d, err := sheriff.Marshal(&sheriff.Options{Groups: []string{"transaction:read"}}, es)
 	if err != nil {
 		h.logger.WithError(err).Error("serialization error")
 		render.InternalServerError(w, r, nil)
@@ -146,7 +143,7 @@ func (h UserHandler) List(w http.ResponseWriter, r *http.Request) {
 	}
 	q = q.Limit(itemsPerPage).Offset((page - 1) * itemsPerPage)
 
-	// Use the query parameters to filter the query.
+	// Use the query parameters to filter the query. todo - nested filter?
 	if f := r.URL.Query().Get("email"); f != "" {
 		q = q.Where(user.Email(f))
 	}

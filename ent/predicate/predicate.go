@@ -6,14 +6,17 @@ import (
 	"github.com/facebook/ent/dialect/sql"
 )
 
-// Group is the predicate function for group builders.
-type Group func(*sql.Selector)
-
-// Job is the predicate function for job builders.
-type Job func(*sql.Selector)
+// Account is the predicate function for account builders.
+type Account func(*sql.Selector)
 
 // Session is the predicate function for session builders.
 type Session func(*sql.Selector)
+
+// Tag is the predicate function for tag builders.
+type Tag func(*sql.Selector)
+
+// Transaction is the predicate function for transaction builders.
+type Transaction func(*sql.Selector)
 
 // User is the predicate function for user builders.
 type User func(*sql.Selector)

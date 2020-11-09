@@ -8,11 +8,12 @@ import (
 	"log"
 
 	"github.com/masseelch/go-api-skeleton/ent/migrate"
-	go_token "github.com/masseelch/go-token"
+	"github.com/masseelch/go-token"
 
-	"github.com/masseelch/go-api-skeleton/ent/group"
-	"github.com/masseelch/go-api-skeleton/ent/job"
+	"github.com/masseelch/go-api-skeleton/ent/account"
 	"github.com/masseelch/go-api-skeleton/ent/session"
+	"github.com/masseelch/go-api-skeleton/ent/tag"
+	"github.com/masseelch/go-api-skeleton/ent/transaction"
 	"github.com/masseelch/go-api-skeleton/ent/user"
 
 	"github.com/facebook/ent/dialect"
@@ -25,12 +26,14 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
-	// Group is the client for interacting with the Group builders.
-	Group *GroupClient
-	// Job is the client for interacting with the Job builders.
-	Job *JobClient
+	// Account is the client for interacting with the Account builders.
+	Account *AccountClient
 	// Session is the client for interacting with the Session builders.
 	Session *SessionClient
+	// Tag is the client for interacting with the Tag builders.
+	Tag *TagClient
+	// Transaction is the client for interacting with the Transaction builders.
+	Transaction *TransactionClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 }
@@ -46,9 +49,10 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
-	c.Group = NewGroupClient(c.config)
-	c.Job = NewJobClient(c.config)
+	c.Account = NewAccountClient(c.config)
 	c.Session = NewSessionClient(c.config)
+	c.Tag = NewTagClient(c.config)
+	c.Transaction = NewTransactionClient(c.config)
 	c.User = NewUserClient(c.config)
 }
 
@@ -80,12 +84,13 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	}
 	cfg := config{driver: tx, log: c.log, debug: c.debug, hooks: c.hooks}
 	return &Tx{
-		ctx:     ctx,
-		config:  cfg,
-		Group:   NewGroupClient(cfg),
-		Job:     NewJobClient(cfg),
-		Session: NewSessionClient(cfg),
-		User:    NewUserClient(cfg),
+		ctx:         ctx,
+		config:      cfg,
+		Account:     NewAccountClient(cfg),
+		Session:     NewSessionClient(cfg),
+		Tag:         NewTagClient(cfg),
+		Transaction: NewTransactionClient(cfg),
+		User:        NewUserClient(cfg),
 	}, nil
 }
 
@@ -100,18 +105,19 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	}
 	cfg := config{driver: &txDriver{tx: tx, drv: c.driver}, log: c.log, debug: c.debug, hooks: c.hooks}
 	return &Tx{
-		config:  cfg,
-		Group:   NewGroupClient(cfg),
-		Job:     NewJobClient(cfg),
-		Session: NewSessionClient(cfg),
-		User:    NewUserClient(cfg),
+		config:      cfg,
+		Account:     NewAccountClient(cfg),
+		Session:     NewSessionClient(cfg),
+		Tag:         NewTagClient(cfg),
+		Transaction: NewTransactionClient(cfg),
+		User:        NewUserClient(cfg),
 	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		Group.
+//		Account.
 //		Query().
 //		Count(ctx)
 //
@@ -133,88 +139,89 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
-	c.Group.Use(hooks...)
-	c.Job.Use(hooks...)
+	c.Account.Use(hooks...)
 	c.Session.Use(hooks...)
+	c.Tag.Use(hooks...)
+	c.Transaction.Use(hooks...)
 	c.User.Use(hooks...)
 }
 
-// GroupClient is a client for the Group schema.
-type GroupClient struct {
+// AccountClient is a client for the Account schema.
+type AccountClient struct {
 	config
 }
 
-// NewGroupClient returns a client for the Group from the given config.
-func NewGroupClient(c config) *GroupClient {
-	return &GroupClient{config: c}
+// NewAccountClient returns a client for the Account from the given config.
+func NewAccountClient(c config) *AccountClient {
+	return &AccountClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `group.Hooks(f(g(h())))`.
-func (c *GroupClient) Use(hooks ...Hook) {
-	c.hooks.Group = append(c.hooks.Group, hooks...)
+// A call to `Use(f, g, h)` equals to `account.Hooks(f(g(h())))`.
+func (c *AccountClient) Use(hooks ...Hook) {
+	c.hooks.Account = append(c.hooks.Account, hooks...)
 }
 
-// Create returns a create builder for Group.
-func (c *GroupClient) Create() *GroupCreate {
-	mutation := newGroupMutation(c.config, OpCreate)
-	return &GroupCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a create builder for Account.
+func (c *AccountClient) Create() *AccountCreate {
+	mutation := newAccountMutation(c.config, OpCreate)
+	return &AccountCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of Group entities.
-func (c *GroupClient) CreateBulk(builders ...*GroupCreate) *GroupCreateBulk {
-	return &GroupCreateBulk{config: c.config, builders: builders}
+// BulkCreate returns a builder for creating a bulk of Account entities.
+func (c *AccountClient) CreateBulk(builders ...*AccountCreate) *AccountCreateBulk {
+	return &AccountCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for Group.
-func (c *GroupClient) Update() *GroupUpdate {
-	mutation := newGroupMutation(c.config, OpUpdate)
-	return &GroupUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for Account.
+func (c *AccountClient) Update() *AccountUpdate {
+	mutation := newAccountMutation(c.config, OpUpdate)
+	return &AccountUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *GroupClient) UpdateOne(gr *Group) *GroupUpdateOne {
-	mutation := newGroupMutation(c.config, OpUpdateOne, withGroup(gr))
-	return &GroupUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *AccountClient) UpdateOne(a *Account) *AccountUpdateOne {
+	mutation := newAccountMutation(c.config, OpUpdateOne, withAccount(a))
+	return &AccountUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *GroupClient) UpdateOneID(id int) *GroupUpdateOne {
-	mutation := newGroupMutation(c.config, OpUpdateOne, withGroupID(id))
-	return &GroupUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *AccountClient) UpdateOneID(id int) *AccountUpdateOne {
+	mutation := newAccountMutation(c.config, OpUpdateOne, withAccountID(id))
+	return &AccountUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for Group.
-func (c *GroupClient) Delete() *GroupDelete {
-	mutation := newGroupMutation(c.config, OpDelete)
-	return &GroupDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for Account.
+func (c *AccountClient) Delete() *AccountDelete {
+	mutation := newAccountMutation(c.config, OpDelete)
+	return &AccountDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a delete builder for the given entity.
-func (c *GroupClient) DeleteOne(gr *Group) *GroupDeleteOne {
-	return c.DeleteOneID(gr.ID)
+func (c *AccountClient) DeleteOne(a *Account) *AccountDeleteOne {
+	return c.DeleteOneID(a.ID)
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *GroupClient) DeleteOneID(id int) *GroupDeleteOne {
-	builder := c.Delete().Where(group.ID(id))
+func (c *AccountClient) DeleteOneID(id int) *AccountDeleteOne {
+	builder := c.Delete().Where(account.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &GroupDeleteOne{builder}
+	return &AccountDeleteOne{builder}
 }
 
-// Query returns a query builder for Group.
-func (c *GroupClient) Query() *GroupQuery {
-	return &GroupQuery{config: c.config}
+// Query returns a query builder for Account.
+func (c *AccountClient) Query() *AccountQuery {
+	return &AccountQuery{config: c.config}
 }
 
-// Get returns a Group entity by its id.
-func (c *GroupClient) Get(ctx context.Context, id int) (*Group, error) {
-	return c.Query().Where(group.ID(id)).Only(ctx)
+// Get returns a Account entity by its id.
+func (c *AccountClient) Get(ctx context.Context, id int) (*Account, error) {
+	return c.Query().Where(account.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *GroupClient) GetX(ctx context.Context, id int) *Group {
+func (c *AccountClient) GetX(ctx context.Context, id int) *Account {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -222,129 +229,25 @@ func (c *GroupClient) GetX(ctx context.Context, id int) *Group {
 	return obj
 }
 
-// QueryUsers queries the users edge of a Group.
-func (c *GroupClient) QueryUsers(gr *Group) *UserQuery {
+// QueryUsers queries the users edge of a Account.
+func (c *AccountClient) QueryUsers(a *Account) *UserQuery {
 	query := &UserQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := gr.ID
+		id := a.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(group.Table, group.FieldID, id),
+			sqlgraph.From(account.Table, account.FieldID, id),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, group.UsersTable, group.UsersColumn),
+			sqlgraph.Edge(sqlgraph.M2M, false, account.UsersTable, account.UsersPrimaryKey...),
 		)
-		fromV = sqlgraph.Neighbors(gr.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // Hooks returns the client hooks.
-func (c *GroupClient) Hooks() []Hook {
-	return c.hooks.Group
-}
-
-// JobClient is a client for the Job schema.
-type JobClient struct {
-	config
-}
-
-// NewJobClient returns a client for the Job from the given config.
-func NewJobClient(c config) *JobClient {
-	return &JobClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `job.Hooks(f(g(h())))`.
-func (c *JobClient) Use(hooks ...Hook) {
-	c.hooks.Job = append(c.hooks.Job, hooks...)
-}
-
-// Create returns a create builder for Job.
-func (c *JobClient) Create() *JobCreate {
-	mutation := newJobMutation(c.config, OpCreate)
-	return &JobCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// BulkCreate returns a builder for creating a bulk of Job entities.
-func (c *JobClient) CreateBulk(builders ...*JobCreate) *JobCreateBulk {
-	return &JobCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for Job.
-func (c *JobClient) Update() *JobUpdate {
-	mutation := newJobMutation(c.config, OpUpdate)
-	return &JobUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *JobClient) UpdateOne(j *Job) *JobUpdateOne {
-	mutation := newJobMutation(c.config, OpUpdateOne, withJob(j))
-	return &JobUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *JobClient) UpdateOneID(id int) *JobUpdateOne {
-	mutation := newJobMutation(c.config, OpUpdateOne, withJobID(id))
-	return &JobUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for Job.
-func (c *JobClient) Delete() *JobDelete {
-	mutation := newJobMutation(c.config, OpDelete)
-	return &JobDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a delete builder for the given entity.
-func (c *JobClient) DeleteOne(j *Job) *JobDeleteOne {
-	return c.DeleteOneID(j.ID)
-}
-
-// DeleteOneID returns a delete builder for the given id.
-func (c *JobClient) DeleteOneID(id int) *JobDeleteOne {
-	builder := c.Delete().Where(job.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &JobDeleteOne{builder}
-}
-
-// Query returns a query builder for Job.
-func (c *JobClient) Query() *JobQuery {
-	return &JobQuery{config: c.config}
-}
-
-// Get returns a Job entity by its id.
-func (c *JobClient) Get(ctx context.Context, id int) (*Job, error) {
-	return c.Query().Where(job.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *JobClient) GetX(ctx context.Context, id int) *Job {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryUsers queries the users edge of a Job.
-func (c *JobClient) QueryUsers(j *Job) *UserQuery {
-	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := j.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(job.Table, job.FieldID, id),
-			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, job.UsersTable, job.UsersPrimaryKey...),
-		)
-		fromV = sqlgraph.Neighbors(j.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *JobClient) Hooks() []Hook {
-	return c.hooks.Job
+func (c *AccountClient) Hooks() []Hook {
+	return c.hooks.Account
 }
 
 // SessionClient is a client for the Session schema.
@@ -387,7 +290,7 @@ func (c *SessionClient) UpdateOne(s *Session) *SessionUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *SessionClient) UpdateOneID(id go_token.Token) *SessionUpdateOne {
+func (c *SessionClient) UpdateOneID(id token.Token) *SessionUpdateOne {
 	mutation := newSessionMutation(c.config, OpUpdateOne, withSessionID(id))
 	return &SessionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -404,7 +307,7 @@ func (c *SessionClient) DeleteOne(s *Session) *SessionDeleteOne {
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *SessionClient) DeleteOneID(id go_token.Token) *SessionDeleteOne {
+func (c *SessionClient) DeleteOneID(id token.Token) *SessionDeleteOne {
 	builder := c.Delete().Where(session.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -417,12 +320,12 @@ func (c *SessionClient) Query() *SessionQuery {
 }
 
 // Get returns a Session entity by its id.
-func (c *SessionClient) Get(ctx context.Context, id go_token.Token) (*Session, error) {
+func (c *SessionClient) Get(ctx context.Context, id token.Token) (*Session, error) {
 	return c.Query().Where(session.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *SessionClient) GetX(ctx context.Context, id go_token.Token) *Session {
+func (c *SessionClient) GetX(ctx context.Context, id token.Token) *Session {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -449,6 +352,198 @@ func (c *SessionClient) QueryUser(s *Session) *UserQuery {
 // Hooks returns the client hooks.
 func (c *SessionClient) Hooks() []Hook {
 	return c.hooks.Session
+}
+
+// TagClient is a client for the Tag schema.
+type TagClient struct {
+	config
+}
+
+// NewTagClient returns a client for the Tag from the given config.
+func NewTagClient(c config) *TagClient {
+	return &TagClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `tag.Hooks(f(g(h())))`.
+func (c *TagClient) Use(hooks ...Hook) {
+	c.hooks.Tag = append(c.hooks.Tag, hooks...)
+}
+
+// Create returns a create builder for Tag.
+func (c *TagClient) Create() *TagCreate {
+	mutation := newTagMutation(c.config, OpCreate)
+	return &TagCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// BulkCreate returns a builder for creating a bulk of Tag entities.
+func (c *TagClient) CreateBulk(builders ...*TagCreate) *TagCreateBulk {
+	return &TagCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Tag.
+func (c *TagClient) Update() *TagUpdate {
+	mutation := newTagMutation(c.config, OpUpdate)
+	return &TagUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TagClient) UpdateOne(t *Tag) *TagUpdateOne {
+	mutation := newTagMutation(c.config, OpUpdateOne, withTag(t))
+	return &TagUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TagClient) UpdateOneID(id int) *TagUpdateOne {
+	mutation := newTagMutation(c.config, OpUpdateOne, withTagID(id))
+	return &TagUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Tag.
+func (c *TagClient) Delete() *TagDelete {
+	mutation := newTagMutation(c.config, OpDelete)
+	return &TagDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *TagClient) DeleteOne(t *Tag) *TagDeleteOne {
+	return c.DeleteOneID(t.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *TagClient) DeleteOneID(id int) *TagDeleteOne {
+	builder := c.Delete().Where(tag.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TagDeleteOne{builder}
+}
+
+// Query returns a query builder for Tag.
+func (c *TagClient) Query() *TagQuery {
+	return &TagQuery{config: c.config}
+}
+
+// Get returns a Tag entity by its id.
+func (c *TagClient) Get(ctx context.Context, id int) (*Tag, error) {
+	return c.Query().Where(tag.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TagClient) GetX(ctx context.Context, id int) *Tag {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *TagClient) Hooks() []Hook {
+	return c.hooks.Tag
+}
+
+// TransactionClient is a client for the Transaction schema.
+type TransactionClient struct {
+	config
+}
+
+// NewTransactionClient returns a client for the Transaction from the given config.
+func NewTransactionClient(c config) *TransactionClient {
+	return &TransactionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `transaction.Hooks(f(g(h())))`.
+func (c *TransactionClient) Use(hooks ...Hook) {
+	c.hooks.Transaction = append(c.hooks.Transaction, hooks...)
+}
+
+// Create returns a create builder for Transaction.
+func (c *TransactionClient) Create() *TransactionCreate {
+	mutation := newTransactionMutation(c.config, OpCreate)
+	return &TransactionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// BulkCreate returns a builder for creating a bulk of Transaction entities.
+func (c *TransactionClient) CreateBulk(builders ...*TransactionCreate) *TransactionCreateBulk {
+	return &TransactionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Transaction.
+func (c *TransactionClient) Update() *TransactionUpdate {
+	mutation := newTransactionMutation(c.config, OpUpdate)
+	return &TransactionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TransactionClient) UpdateOne(t *Transaction) *TransactionUpdateOne {
+	mutation := newTransactionMutation(c.config, OpUpdateOne, withTransaction(t))
+	return &TransactionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TransactionClient) UpdateOneID(id int) *TransactionUpdateOne {
+	mutation := newTransactionMutation(c.config, OpUpdateOne, withTransactionID(id))
+	return &TransactionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Transaction.
+func (c *TransactionClient) Delete() *TransactionDelete {
+	mutation := newTransactionMutation(c.config, OpDelete)
+	return &TransactionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *TransactionClient) DeleteOne(t *Transaction) *TransactionDeleteOne {
+	return c.DeleteOneID(t.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *TransactionClient) DeleteOneID(id int) *TransactionDeleteOne {
+	builder := c.Delete().Where(transaction.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TransactionDeleteOne{builder}
+}
+
+// Query returns a query builder for Transaction.
+func (c *TransactionClient) Query() *TransactionQuery {
+	return &TransactionQuery{config: c.config}
+}
+
+// Get returns a Transaction entity by its id.
+func (c *TransactionClient) Get(ctx context.Context, id int) (*Transaction, error) {
+	return c.Query().Where(transaction.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TransactionClient) GetX(ctx context.Context, id int) *Transaction {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryUser queries the user edge of a Transaction.
+func (c *TransactionClient) QueryUser(t *Transaction) *UserQuery {
+	query := &UserQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(transaction.Table, transaction.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, transaction.UserTable, transaction.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *TransactionClient) Hooks() []Hook {
+	return c.hooks.Transaction
 }
 
 // UserClient is a client for the User schema.
@@ -550,15 +645,15 @@ func (c *UserClient) QuerySessions(u *User) *SessionQuery {
 	return query
 }
 
-// QueryJobs queries the jobs edge of a User.
-func (c *UserClient) QueryJobs(u *User) *JobQuery {
-	query := &JobQuery{config: c.config}
+// QueryAccounts queries the accounts edge of a User.
+func (c *UserClient) QueryAccounts(u *User) *AccountQuery {
+	query := &AccountQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
-			sqlgraph.To(job.Table, job.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, user.JobsTable, user.JobsPrimaryKey...),
+			sqlgraph.To(account.Table, account.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, user.AccountsTable, user.AccountsPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil
@@ -566,15 +661,15 @@ func (c *UserClient) QueryJobs(u *User) *JobQuery {
 	return query
 }
 
-// QueryGroup queries the group edge of a User.
-func (c *UserClient) QueryGroup(u *User) *GroupQuery {
-	query := &GroupQuery{config: c.config}
+// QueryTransactions queries the transactions edge of a User.
+func (c *UserClient) QueryTransactions(u *User) *TransactionQuery {
+	query := &TransactionQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
-			sqlgraph.To(group.Table, group.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, user.GroupTable, user.GroupColumn),
+			sqlgraph.To(transaction.Table, transaction.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.TransactionsTable, user.TransactionsColumn),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil

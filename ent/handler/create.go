@@ -13,15 +13,15 @@ import (
 )
 
 // struct to bind the post body to.
-type groupCreateRequest struct {
-	Title string `json:"title,omitempty"`
-	Users []int
+type accountCreateRequest struct {
+	Title string `json:"title,omitempty" `
+	Users []int  `json:"users,omitempty" `
 }
 
-// This function creates a new Group model and stores it in the database.
-func (h GroupHandler) Create(w http.ResponseWriter, r *http.Request) {
+// This function creates a new Account model and stores it in the database.
+func (h AccountHandler) Create(w http.ResponseWriter, r *http.Request) {
 	// Get the post data.
-	d := groupCreateRequest{} // todo - allow form-url-encdoded/xml/protobuf data.
+	d := accountCreateRequest{} // todo - allow form-url-encdoded/xml/protobuf data.
 	if err := json.NewDecoder(r.Body).Decode(&d); err != nil {
 		h.logger.WithError(err).Error("error decoding json")
 		render.BadRequest(w, r, "invalid json string")
@@ -42,48 +42,40 @@ func (h GroupHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Save the data.
-	b := h.client.Group.Create().
+	b := h.client.Account.Create().
 		SetTitle(d.Title).
 		AddUserIDs(d.Users...)
 
 	// Store in database.
 	e, err := b.Save(r.Context())
 	if err != nil {
-		h.logger.WithError(err).Error("error saving Group")
+		h.logger.WithError(err).Error("error saving Account")
 		render.InternalServerError(w, r, nil)
 		return
 	}
 
 	// Serialize the data.
-	j, err := sheriff.Marshal(&sheriff.Options{Groups: []string{"group:read"}}, e)
+	j, err := sheriff.Marshal(&sheriff.Options{Groups: []string{"account:read"}}, e)
 	if err != nil {
-		h.logger.WithError(err).WithField("Group.id", e.ID).Error("serialization error")
+		h.logger.WithError(err).WithField("Account.id", e.ID).Error("serialization error")
 		render.InternalServerError(w, r, nil)
 		return
 	}
 
-	h.logger.WithField("group", e.ID).Info("group rendered")
+	h.logger.WithField("account", e.ID).Info("account rendered")
 	render.OK(w, r, j)
 }
 
 // struct to bind the post body to.
-type jobCreateRequest struct {
-	Date                   time.Time `json:"date,omitempty" groups:"job:list,job:read"`
-	Task                   string    `json:"task,omitempty" groups:"job:list,job:read" validate:"required"`
-	State                  string    `json:"state,omitempty" groups:"job:list,job:read" validate:"required,oneof=open closed billed"`
-	Report                 string    `json:"report,omitempty" groups:"job:list,job:read"`
-	Rest                   string    `json:"rest,omitempty" groups:"job:list,job:read"`
-	Note                   string    `json:"note,omitempty" groups:"job:list,job:read"`
-	CustomerName           string    `json:"customerName,omitempty" groups:"job:list,job:read"`
-	RiskAssessmentRequired bool      `json:"riskAssessmentRequired,omitempty" groups:"job:list,job:read"`
-	MaintenanceRequired    bool      `json:"maintenanceRequired,omitempty" groups:"job:list,job:read"`
-	Users                  []int     `users,omitempty`
+type tagCreateRequest struct {
+	Title       string `json:"title,omitempty" `
+	Description string `json:"description,omitempty" `
 }
 
-// This function creates a new Job model and stores it in the database.
-func (h JobHandler) Create(w http.ResponseWriter, r *http.Request) {
+// This function creates a new Tag model and stores it in the database.
+func (h TagHandler) Create(w http.ResponseWriter, r *http.Request) {
 	// Get the post data.
-	d := jobCreateRequest{} // todo - allow form-url-encdoded/xml/protobuf data.
+	d := tagCreateRequest{} // todo - allow form-url-encdoded/xml/protobuf data.
 	if err := json.NewDecoder(r.Body).Decode(&d); err != nil {
 		h.logger.WithError(err).Error("error decoding json")
 		render.BadRequest(w, r, "invalid json string")
@@ -104,44 +96,91 @@ func (h JobHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Save the data.
-	b := h.client.Job.Create().
-		SetDate(d.Date).
-		SetTask(d.Task).
-		SetState(d.State).
-		SetReport(d.Report).
-		SetRest(d.Rest).
-		SetNote(d.Note).
-		SetCustomerName(d.CustomerName).
-		SetRiskAssessmentRequired(d.RiskAssessmentRequired).
-		SetMaintenanceRequired(d.MaintenanceRequired).
-		AddUserIDs(d.Users...)
+	b := h.client.Tag.Create().
+		SetTitle(d.Title).
+		SetDescription(d.Description)
 
 	// Store in database.
 	e, err := b.Save(r.Context())
 	if err != nil {
-		h.logger.WithError(err).Error("error saving Job")
+		h.logger.WithError(err).Error("error saving Tag")
 		render.InternalServerError(w, r, nil)
 		return
 	}
 
 	// Serialize the data.
-	j, err := sheriff.Marshal(&sheriff.Options{Groups: []string{"job:read", "user:list"}}, e)
+	j, err := sheriff.Marshal(&sheriff.Options{Groups: []string{"tag:read"}}, e)
 	if err != nil {
-		h.logger.WithError(err).WithField("Job.id", e.ID).Error("serialization error")
+		h.logger.WithError(err).WithField("Tag.id", e.ID).Error("serialization error")
 		render.InternalServerError(w, r, nil)
 		return
 	}
 
-	h.logger.WithField("job", e.ID).Info("job rendered")
+	h.logger.WithField("tag", e.ID).Info("tag rendered")
+	render.OK(w, r, j)
+}
+
+// struct to bind the post body to.
+type transactionCreateRequest struct {
+	Date   time.Time `json:"date,omitempty" `
+	Amount int       `json:"amount,omitempty" `
+	User   int       `json:"" `
+}
+
+// This function creates a new Transaction model and stores it in the database.
+func (h TransactionHandler) Create(w http.ResponseWriter, r *http.Request) {
+	// Get the post data.
+	d := transactionCreateRequest{} // todo - allow form-url-encdoded/xml/protobuf data.
+	if err := json.NewDecoder(r.Body).Decode(&d); err != nil {
+		h.logger.WithError(err).Error("error decoding json")
+		render.BadRequest(w, r, "invalid json string")
+		return
+	}
+
+	// Validate the data.
+	if err := h.validator.Struct(d); err != nil {
+		if err, ok := err.(*validator.InvalidValidationError); ok {
+			h.logger.WithError(err).Error("error validating request data")
+			render.InternalServerError(w, r, nil)
+			return
+		}
+
+		h.logger.WithError(err).Info("validation failed")
+		render.BadRequest(w, r, err)
+		return
+	}
+
+	// Save the data.
+	b := h.client.Transaction.Create().
+		SetDate(d.Date).
+		SetAmount(d.Amount).
+		SetUserID(d.User)
+
+	// Store in database.
+	e, err := b.Save(r.Context())
+	if err != nil {
+		h.logger.WithError(err).Error("error saving Transaction")
+		render.InternalServerError(w, r, nil)
+		return
+	}
+
+	// Serialize the data.
+	j, err := sheriff.Marshal(&sheriff.Options{Groups: []string{"transaction:read"}}, e)
+	if err != nil {
+		h.logger.WithError(err).WithField("Transaction.id", e.ID).Error("serialization error")
+		render.InternalServerError(w, r, nil)
+		return
+	}
+
+	h.logger.WithField("transaction", e.ID).Info("transaction rendered")
 	render.OK(w, r, j)
 }
 
 // struct to bind the post body to.
 type userCreateRequest struct {
-	Email    string `json:"email,omitempty" groups:"user:list"`
-	Password string `json:"password,omitempty"`
-	Enabled  bool   `json:"enabled,omitempty" groups:"user:list"`
-	Group    int    `group,omitempty`
+	Email    string `json:"email,omitempty" `
+	Password string `json:"password,omitempty" `
+	Enabled  bool   `json:"enabled,omitempty" `
 }
 
 // This function creates a new User model and stores it in the database.
@@ -171,8 +210,7 @@ func (h UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 	b := h.client.User.Create().
 		SetEmail(d.Email).
 		SetPassword(d.Password).
-		SetEnabled(d.Enabled).
-		SetGroupID(d.Group)
+		SetEnabled(d.Enabled)
 
 	// Store in database.
 	e, err := b.Save(r.Context())

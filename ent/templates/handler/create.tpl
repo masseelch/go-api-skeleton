@@ -38,14 +38,14 @@
                 {{ range $f := $n.Fields -}}
                     {{- $a := $f.Annotations.FieldGen }}
                     {{- if or (not $a) $a.Create }}
-                        {{ $f.StructField }} {{ $f.Type.String }} `{{ $f.StructTag }}`
+                        {{ $f.StructField }} {{ $f.Type.String }} `json:"{{ tagLookup $f.StructTag "json" }}" {{ if $a.CreateValidationTag }}validate:"{{ $a.CreateValidationTag }}"{{ end }}`
                     {{- end }}
                 {{- end -}}
                 {{/* Add all edges that are not excluded. */}}
                 {{- range $e := $n.Edges -}}
                     {{- $a := $e.Annotations.FieldGen }}
                     {{- if and (not $e.Type.Annotations.HandlerGen.SkipGeneration) (or (not $a) $a.Create) }}
-                        {{ $e.StructField }} {{ if not $e.Unique }}[]{{ end }}{{ $e.Type.ID.Type.String }} {{ with tagLookup $e.StructTag "json" }}`{{ . }}`{{ end }}
+                        {{ $e.StructField }} {{ if not $e.Unique }}[]{{ end }}{{ $e.Type.ID.Type.String }} `json:"{{ tagLookup $e.StructTag "json" }}" {{ if $a.CreateValidationTag }}validate:"{{ $a.CreateValidationTag }}"{{ end }}`
                     {{- end -}}
                 {{- end }}
             }

@@ -35,14 +35,13 @@ func (User) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("sessions", Session.Type).
 			StructTag(`json:"-"`),
-		edge.From("jobs", Job.Type).
+		edge.From("accounts", Account.Type).
 			Ref("users").
-			StructTag(`json:"jobs,omitempty" groups:"user:read"`).
+			StructTag(`json:"accounts,omitempty" groups:"user:read"`).
 			Annotations(FieldAnnotation{Create: false}),
-		edge.From("group", Group.Type).
-			Ref("users").
-			Unique().
-			StructTag(`json:"group,omitempty" groups:"user:read"`),
+		edge.To("transactions", Transaction.Type).
+			StructTag(`json:"transactions,omitempty" groups:"user:read"`).
+			Annotations(FieldAnnotation{Create: false}),
 	}
 }
 

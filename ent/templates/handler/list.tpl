@@ -38,7 +38,7 @@
                 }
                 q = q.Limit(itemsPerPage).Offset((page - 1) * itemsPerPage)
 
-                // Use the query parameters to filter the query.
+                // Use the query parameters to filter the query. todo - nested filter?
                 {{- range $f := $n.Fields }}
                     {{- $jsonName := index (split (tagLookup $f.StructTag "json") ",") 0 }}
                     if f := r.URL.Query().Get("{{ $jsonName }}"); f != "" {
